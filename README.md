@@ -82,7 +82,16 @@ The CLI is a single setup command — no manual steps required. Here's what happ
 
 After install, restart your harness gateway and start chatting.
 
+## Supported harnesses
+
+| Harness | Status |
+|---------|--------|
+| [OpenClaw](https://openclaw.dev) | Supported |
+| [NemoClaw](https://github.com/NVIDIA/NeMo-Agent) | Coming soon |
+| [Hermes](https://hermes-agent.nousresearch.com) | Coming soon |
+| [Claude Code](https://claude.ai/code) | Coming soon |
+
 ## Requirements
 
-- A supported harness (e.g. [OpenClaw](https://openclaw.dev))
+- A supported harness
 - Everything else is handled by the CLI — it installs the Hindsight plugin, runs the configuration wizard, and connects to the Hindsight API automatically
