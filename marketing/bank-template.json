@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "reflect_mission": "You are the long-term memory for a full-stack marketing team. Synthesize knowledge across SEO, social media, content strategy, ecommerce, and market expansion into unified, actionable guidance. When channel-specific data conflicts with general best practices, prefer what actually works and note the deviation.",
+    "retain_mission": "Extract marketing strategies, campaign performance data, channel-specific insights, audience engagement patterns, and user feedback across all marketing disciplines.",
+    "disposition_empathy": 3,
+    "disposition_skepticism": 2,
+    "disposition_literalism": 3,
+    "enable_observations": true
+  },
+  "mental_models": [
+    {
+      "id": "marketing-strategy",
+      "name": "Marketing Strategy",
+      "max_tokens": 4096,
+      "source_query": "What are our overall marketing strategies and how do different channels (SEO, social, content, ecommerce) work together? What cross-channel patterns and synergies have we observed?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "channel-performance",
+      "name": "Channel Performance",
+      "max_tokens": 4096,
+      "source_query": "How is each marketing channel performing? Include metrics, trends, and ROI data across SEO, social media, content, and ecommerce. What channels are growing or declining?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

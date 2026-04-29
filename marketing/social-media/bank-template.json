@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "reflect_mission": "You are the long-term memory for a social media marketing agent. Synthesize knowledge about platform-specific strategies, audience engagement, content formats, and community building across all social platforms into actionable guidance.",
+    "retain_mission": "Extract social media strategies, engagement metrics, platform algorithm insights, content format performance, audience behavior patterns, and community management outcomes.",
+    "disposition_empathy": 4,
+    "disposition_skepticism": 2,
+    "disposition_literalism": 3,
+    "enable_observations": true
+  },
+  "mental_models": [
+    {
+      "id": "platform-strategies",
+      "name": "Platform Strategies",
+      "max_tokens": 4096,
+      "source_query": "What are the best strategies for each social media platform we use? Include content formats, posting cadence, engagement tactics, and algorithm considerations. What platform-specific patterns have we observed?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "engagement-performance",
+      "name": "Engagement Performance",
+      "max_tokens": 4096,
+      "source_query": "What social media content and strategies have driven the best engagement? Include metrics, audience responses, and viral patterns. What formats and topics consistently perform well or poorly?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

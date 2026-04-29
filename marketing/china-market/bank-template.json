@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "bank": {
+    "reflect_mission": "You are the long-term memory for a China market specialist agent. Synthesize knowledge about Chinese digital platforms (WeChat, Douyin, Xiaohongshu, Baidu, Bilibili, etc.), market localization, and cross-border commerce into actionable guidance for the Chinese market.",
+    "retain_mission": "Extract China market strategies, platform-specific insights, localization decisions, regulatory considerations, and performance data across Chinese digital platforms.",
+    "disposition_empathy": 3,
+    "disposition_skepticism": 3,
+    "disposition_literalism": 4,
+    "enable_observations": true
+  },
+  "mental_models": [
+    {
+      "id": "china-platform-strategies",
+      "name": "China Platform Strategies",
+      "max_tokens": 4096,
+      "source_query": "What are the best strategies for each Chinese platform (WeChat, Douyin, Xiaohongshu, Baidu, Bilibili, etc.)? Include content formats, audience behavior, regulatory requirements, and performance data.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

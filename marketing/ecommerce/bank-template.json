@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "bank": {
+    "reflect_mission": "You are the long-term memory for an ecommerce marketing agent. Synthesize knowledge about cross-border commerce, livestream selling, marketplace optimization, and conversion strategies into actionable guidance.",
+    "retain_mission": "Extract ecommerce strategies, conversion data, marketplace insights, livestream performance, and cross-border commerce outcomes.",
+    "disposition_empathy": 3,
+    "disposition_skepticism": 2,
+    "disposition_literalism": 4,
+    "enable_observations": true
+  },
+  "mental_models": [
+    {
+      "id": "ecommerce-performance",
+      "name": "Ecommerce Performance",
+      "max_tokens": 4096,
+      "source_query": "What ecommerce strategies and channels have performed best? Include conversion rates, revenue data, marketplace insights, and cross-border commerce outcomes. What patterns drive the most sales?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

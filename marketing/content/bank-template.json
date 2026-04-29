@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "bank": {
+    "reflect_mission": "You are the long-term memory for a content marketing agent. Synthesize knowledge about content strategy, creation workflows, growth hacking, and audience development into actionable guidance. Track what content formats, topics, and distribution channels drive the most impact.",
+    "retain_mission": "Extract content strategies, performance metrics, audience feedback, editorial decisions, and growth experiment outcomes.",
+    "disposition_empathy": 3,
+    "disposition_skepticism": 2,
+    "disposition_literalism": 3,
+    "enable_observations": true
+  },
+  "mental_models": [
+    {
+      "id": "content-strategy",
+      "name": "Content Strategy",
+      "max_tokens": 4096,
+      "source_query": "What content strategies, formats, and topics have driven the most impact? Include performance data, audience preferences, and editorial guidelines. What patterns emerge about what resonates?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}
