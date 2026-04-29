@@ -69,7 +69,20 @@ my-team/
 
 Content files are discovered recursively. Each level can have its own `bank-template.json` with a tailored mission and knowledge pages.
 
+## What `install` does
+
+The CLI is a single setup command — no manual steps required. Here's what happens:
+
+1. **Fetches the agent** — downloads the directory from GitHub (or uses a local path)
+2. **Ensures the Hindsight plugin is installed** on your harness — installs it automatically if missing, and runs the configuration wizard if needed
+3. **Connects to Hindsight** and imports the `bank-template.json` (memory bank config, knowledge pages, directives)
+4. **Ingests all content files** (`.md`, `.txt`, etc.) found recursively as seed knowledge
+5. **Creates a workspace** at `~/.self-driving-agents/<harness>/<agent>/` with the knowledge skill
+6. **Registers the agent** with your harness and patches its startup to load the skill
+
+After install, restart your harness gateway and start chatting.
+
 ## Requirements
 
-- A supported harness with the [Hindsight plugin](https://github.com/vectorize-io/hindsight) installed
-- The CLI handles plugin installation and configuration if needed
+- A supported harness (e.g. [OpenClaw](https://openclaw.dev))
+- Everything else is handled by the CLI — it installs the Hindsight plugin, runs the configuration wizard, and connects to the Hindsight API automatically
