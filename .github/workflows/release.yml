@@ -41,7 +41,7 @@ jobs:
     - name: Publish to npm
       run: |
         set +e
-        OUTPUT=$(npm publish --access public 2>&1)
+        OUTPUT=$(npm publish --provenance --access public 2>&1)
         EXIT_CODE=$?
         echo "$OUTPUT"
         if [ $EXIT_CODE -ne 0 ]; then
