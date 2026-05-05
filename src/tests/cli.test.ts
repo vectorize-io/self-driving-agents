@@ -498,12 +498,14 @@ describe("claude skill generation", () => {
   });
 
   it("bakes auth token when provided", () => {
-    const authHeader = "secret-token" ? `-H "Authorization: Bearer secret-token"` : "";
+    const token: string | undefined = "secret-token";
+    const authHeader = token ? `-H "Authorization: Bearer ${token}"` : "";
     expect(authHeader).toContain("Bearer secret-token");
   });
 
   it("omits auth header when no token", () => {
-    const authHeader = undefined ? `-H "Authorization: Bearer undefined"` : "";
+    const token: string | undefined = undefined;
+    const authHeader = token ? `-H "Authorization: Bearer ${token}"` : "";
     expect(authHeader).toBe("");
   });
 });
