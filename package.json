@@ -8,11 +8,10 @@
     "self-driving-agents": "dist/cli.js"
   },
   "files": [
-    "dist",
-    "skill"
+    "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/skill dist/",
     "test": "vitest run src/tests",
     "prepublishOnly": "npm run build"
   },
