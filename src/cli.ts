@@ -1025,8 +1025,6 @@ async function main() {
       ccConfig.dynamicBankId = true;
       ccConfig.dynamicBankGranularity = expectedGranularity;
       ccConfig.enableKnowledgeTools = true;
-      // SDA agents need auto-retain to capture conversation context for the agent's bank
-      if (ccConfig.autoRetain === undefined) ccConfig.autoRetain = true;
       mkdirSync(ccConfigDir, { recursive: true });
       writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
       p.log.success(`Plugin config: ${color.dim(ccConfigPath)}`);
