@@ -985,15 +985,44 @@ async function main() {
         const claudeConfig = await promptClaudeConfig(agentId);
         ccConfig.hindsightApiUrl = claudeConfig.apiUrl;
         ccConfig.hindsightApiToken = claudeConfig.apiToken;
-        ccConfig.enableKnowledgeTools = true;
-        mkdirSync(ccConfigDir, { recursive: true });
-        writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
-        p.log.success(`Hindsight connection saved to ${color.dim(ccConfigPath)}`);
-      } else if (!ccConfig.enableKnowledgeTools) {
-        ccConfig.enableKnowledgeTools = true;
-        mkdirSync(ccConfigDir, { recursive: true });
-        writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
       }
+
+      // Verify/set bank granularity. SDA agents need per-project isolation —
+      // bank derived as agentName::projectBasename. If the user has a conflicting
+      // config (dynamicBankId: false with a static bankId), bail with instructions.
+      if (ccConfig.dynamicBankId === false && ccConfig.bankId) {
+        p.cancel(
+          `Conflicting plugin config in ${ccConfigPath}:\n` +
+            `  Found: dynamicBankId=false, bankId="${ccConfig.bankId}"\n` +
+            `  Self-driving agents need dynamicBankId=true with granularity ["agent", "project"].\n` +
+            `  Remove "dynamicBankId" and "bankId" from the config, or set them to:\n` +
+            `    "dynamicBankId": true,\n` +
+            `    "dynamicBankGranularity": ["agent", "project"]`
+        );
+        process.exit(1);
+      }
+
+      const expectedGranularity = ["agent", "project"];
+      const currentGranularity = ccConfig.dynamicBankGranularity;
+      if (
+        currentGranularity &&
+        JSON.stringify(currentGranularity) !== JSON.stringify(expectedGranularity)
+      ) {
+        p.cancel(
+          `Conflicting plugin config in ${ccConfigPath}:\n` +
+            `  Found: dynamicBankGranularity=${JSON.stringify(currentGranularity)}\n` +
+            `  Self-driving agents require: ${JSON.stringify(expectedGranularity)}\n` +
+            `  Update the config to match, or remove the field to let the installer set it.`
+        );
+        process.exit(1);
+      }
+
+      ccConfig.dynamicBankId = true;
+      ccConfig.dynamicBankGranularity = expectedGranularity;
+      ccConfig.enableKnowledgeTools = true;
+      mkdirSync(ccConfigDir, { recursive: true });
+      writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
+      p.log.success(`Plugin config: ${color.dim(ccConfigPath)}`);
 
       // Step 4: Save content locally for the agent
       const contentDir = join(homedir(), ".self-driving-agents", "claude-code", agentId);
@@ -1042,15 +1071,16 @@ async function main() {
         p.log.success("Auto-approved hindsight tools in Claude Code");
       }
 
-      const hasBankTemplate = existsSync(join(contentDir, "bank-template.json"));
-      const prompt = hasBankTemplate
-        ? `Use /hindsight-memory:create-agent to create a "${agentId}" agent. Then ingest all files from ${contentDir}/ (skip bank-template.json). Read ${contentDir}/bank-template.json and create the exact mental models (knowledge pages) defined in its "mental_models" array using agent_knowledge_create_page for each one.`
-        : `Use /hindsight-memory:create-agent to create a "${agentId}" agent. Then ingest all files from ${contentDir}/ and create 3 knowledge pages that make sense based on the content.`;
+      const prompt = `/hindsight-memory:create-agent ${agentId} from ${contentDir}`;
 
       p.note(
         [
-          `${color.dim("1.")} Start Claude Code`,
-          `${color.dim("2.")} Say: ${color.cyan(prompt)}`,
+          `${color.yellow("⚠")}  ${color.bold(`Important:`)} the agent's memory is scoped to the directory where you start ${color.cyan("claude")}.`,
+          `   Always start your Claude Code sessions from the same project directory.`,
+          ``,
+          `${color.dim("1.")} ${color.cyan("cd")} into your project directory`,
+          `${color.dim("2.")} Run: ${color.cyan("claude")}`,
+          `${color.dim("3.")} Say: ${color.cyan(prompt)}`,
         ].join("\n"),
         "Next steps"
       );
