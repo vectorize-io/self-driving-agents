@@ -1056,22 +1056,24 @@ async function main() {
           /* ignore */
         }
       }
-      const allowedTools: string[] = userSettings.allowedTools || [];
+      const permissions = (userSettings.permissions ||= {}) as { allow?: string[] };
+      const allow: string[] = permissions.allow || [];
       const toolsToAllow = [
-        "mcp__hindsight__*",
+        "mcp__plugin_hindsight-memory_hindsight__*",
         "Skill(hindsight-memory:create-agent)",
         `Bash(ls ~/.self-driving-agents/*)`,
         `Bash(cat ~/.self-driving-agents/*)`,
       ];
       let updated = false;
       for (const tool of toolsToAllow) {
-        if (!allowedTools.includes(tool)) {
-          allowedTools.push(tool);
+        if (!allow.includes(tool)) {
+          allow.push(tool);
           updated = true;
         }
       }
       if (updated) {
-        userSettings.allowedTools = allowedTools;
+        permissions.allow = allow;
+        userSettings.permissions = permissions;
         writeFileSync(userSettingsPath, JSON.stringify(userSettings, null, 2) + "\n");
         p.log.success("Auto-approved hindsight tools in Claude Code");
       }

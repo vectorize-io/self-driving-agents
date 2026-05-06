@@ -691,7 +691,7 @@ describe("claude-code marketplace detection", () => {
 });
 
 describe("claude-code allowed-tools merge", () => {
-  // Mirrors the auto-approve logic that merges entries into ~/.claude/settings.json's allowedTools.
+  // Mirrors the auto-approve logic that merges entries into ~/.claude/settings.json's permissions.allow.
   function mergeAllowed(existing: string[], toAdd: string[]): { merged: string[]; updated: boolean } {
     const merged = [...existing];
     let updated = false;
@@ -705,7 +705,7 @@ describe("claude-code allowed-tools merge", () => {
   }
 
   const HINDSIGHT_TOOLS = [
-    "mcp__hindsight__*",
+    "mcp__plugin_hindsight-memory_hindsight__*",
     "Skill(hindsight-memory:create-agent)",
     "Bash(ls ~/.self-driving-agents/*)",
     "Bash(cat ~/.self-driving-agents/*)",
@@ -721,7 +721,7 @@ describe("claude-code allowed-tools merge", () => {
     const { merged } = mergeAllowed(["Bash(npm *)", "Read"], HINDSIGHT_TOOLS);
     expect(merged).toContain("Bash(npm *)");
     expect(merged).toContain("Read");
-    expect(merged).toContain("mcp__hindsight__*");
+    expect(merged).toContain("mcp__plugin_hindsight-memory_hindsight__*");
   });
 
   it("does not duplicate when already present", () => {
@@ -732,7 +732,7 @@ describe("claude-code allowed-tools merge", () => {
   });
 
   it("only adds missing entries", () => {
-    const existing = ["mcp__hindsight__*"];
+    const existing = ["mcp__plugin_hindsight-memory_hindsight__*"];
     const { merged, updated } = mergeAllowed(existing, HINDSIGHT_TOOLS);
     expect(updated).toBe(true);
     expect(merged).toHaveLength(HINDSIGHT_TOOLS.length);
