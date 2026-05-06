@@ -158,6 +158,33 @@ function enableKnowledgeTools(): void {
   writeFileSync(OPENCLAW_CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
 }
 
+// SDA agents are isolated per-agent only — no channel/user. The plugin's default
+// (["agent","channel","user"]) produces banks like "marketing-seo::unknown::anonymous"
+// for local sessions where channel/sender aren't populated.
+async function ensureOpenClawAgentGranularity(): Promise<void> {
+  const config = readOpenClawConfig();
+  if (!config) return;
+  const pc = config.plugins?.entries?.["hindsight-openclaw"]?.config;
+  if (!pc) return;
+
+  const current: string[] | undefined = pc.dynamicBankGranularity;
+  const desired = ["agent"];
+  const matches = Array.isArray(current) && current.length === 1 && current[0] === "agent";
+  if (matches) return;
+
+  if (current && current.length > 0) {
+    const ok = await p.confirm({
+      message: `Plugin has dynamicBankGranularity=${color.yellow(JSON.stringify(current))}. SDA agents need ${color.cyan('["agent"]')}. Override?`,
+      initialValue: true,
+    });
+    if (p.isCancel(ok) || !ok) return;
+  }
+
+  pc.dynamicBankGranularity = desired;
+  writeFileSync(OPENCLAW_CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
+  p.log.success("Set dynamicBankGranularity = [\"agent\"] for per-agent bank isolation");
+}
+
 const MIN_PLUGIN_VERSION = "0.7.2";
 
 function getInstalledPluginVersion(): string | null {
@@ -211,7 +238,7 @@ function resolveFromPlugin(agentId: string): { apiUrl: string; bankId: string; a
   if (pc.dynamicBankId === false && pc.bankId) {
     bankId = pc.bankId;
   } else {
-    const granularity: string[] = pc.dynamicBankGranularity || ["agent", "channel", "user"];
+    const granularity: string[] = pc.dynamicBankGranularity || ["agent"];
     const fieldMap: Record<string, string> = {
       agent: agentId,
       channel: "unknown",
@@ -831,9 +858,11 @@ async function main() {
     if (harness === "openclaw") {
       await ensurePlugin();
       enableKnowledgeTools();
+      await ensureOpenClawAgentGranularity();
       ({ apiUrl, bankId, apiToken } = resolveFromPlugin(agentId));
     } else if (harness === "nemoclaw") {
       await ensureNemoClawPlugin(sandbox!, agentId);
+      await ensureOpenClawAgentGranularity();
       ({ apiUrl, bankId, apiToken } = resolveFromPlugin(agentId));
     } else if (harness === "hermes") {
       // Resolve Hindsight connection: hermes config > openclaw config > prompt

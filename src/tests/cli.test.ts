@@ -739,6 +739,38 @@ describe("claude-code allowed-tools merge", () => {
   });
 });
 
+describe("openclaw dynamicBankGranularity enforcement", () => {
+  // Mirrors ensureOpenClawAgentGranularity's decision logic. SDA agents are
+  // local/per-agent — they don't have channel/user, so the plugin's default
+  // ["agent","channel","user"] produces "<agent>::unknown::anonymous" banks.
+  type Action = "noop" | "set-fresh" | "ask-confirm";
+  function decide(current: unknown): Action {
+    if (Array.isArray(current) && current.length === 1 && current[0] === "agent") {
+      return "noop";
+    }
+    if (Array.isArray(current) && current.length > 0) {
+      return "ask-confirm";
+    }
+    return "set-fresh";
+  }
+
+  it("sets [agent] when not configured (fresh install)", () => {
+    expect(decide(undefined)).toBe("set-fresh");
+    expect(decide(null)).toBe("set-fresh");
+    expect(decide([])).toBe("set-fresh");
+  });
+
+  it("noop when already [agent]", () => {
+    expect(decide(["agent"])).toBe("noop");
+  });
+
+  it("asks confirmation when set to a different value", () => {
+    expect(decide(["agent", "channel", "user"])).toBe("ask-confirm");
+    expect(decide(["channel"])).toBe("ask-confirm");
+    expect(decide(["agent", "project"])).toBe("ask-confirm");
+  });
+});
+
 describe("claude-code Hindsight config persistence", () => {
   // Mirrors the config-write logic: if existing config has a connection
   // (hindsightApiUrl or llmProvider), don't prompt; otherwise prompt.
