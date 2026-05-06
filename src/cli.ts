@@ -136,7 +136,7 @@ async function resolveAgentDir(
 // ── Skill ───────────────────────────────────────────────
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SKILL_PATH = join(__dirname, "..", "skill", "SKILL.md");
+const SKILL_PATH = join(__dirname, "skill", "SKILL.md");
 const SKILL_MD = readFileSync(SKILL_PATH, "utf-8");
 
 // ── Plugin management ───────────────────────────────────
