@@ -1,23 +1,22 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import CodeBlock from '../../components/CodeBlock.astro';
-import { flattenAgents, loadRootAgent, type AgentNode, type AgentFile } from '../../lib/agents';
+import { flattenAgents, type AgentNode, type AgentFile } from '../../lib/agents';
+import { HARNESSES } from '../../lib/harnesses';
 import { marked } from 'marked';
 
 export async function getStaticPaths() {
   const agents = flattenAgents();
-  const root = loadRootAgent();
   return agents.map((agent) => ({
     params: { slug: agent.slug },
-    props: { agent, rootSlug: root.slug },
+    props: { agent },
   }));
 }
 
 interface Props {
   agent: AgentNode;
-  rootSlug: string;
 }
-const { agent, rootSlug } = Astro.props;
+const { agent } = Astro.props;
 
 const base = import.meta.env.BASE_URL;
 const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
@@ -29,8 +28,8 @@ const crumbs = segments.map((seg, i) => {
   return { label: seg, href: link(`/agents/${slug}`) };
 });
 
-const installCmd = (h: string) =>
-  `npx @vectorize-io/self-driving-agents install ${agent.slug} --harness ${h}`;
+const installCmd = (slug: string) =>
+  `npx @vectorize-io/self-driving-agents install ${agent.slug} --harness ${slug}`;
 
 const renderMd = (md: string): string => {
   // simple, safe-enough rendering — content is from this repo
@@ -100,12 +99,8 @@ const colorOf = (f: AgentFile) => {
         Pick the harness that matches where you'll chat with the agent.
       </p>
 
-      <div class="mt-5 grid gap-4 md:grid-cols-3">
-        {[
-          { slug: 'claude', name: 'Claude Chat / Cowork' },
-          { slug: 'openclaw', name: 'OpenClaw' },
-          { slug: 'nemoclaw', name: 'NemoClaw' },
-        ].map((h) => (
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        {HARNESSES.map((h) => (
           <div class="rounded-xl border border-ink-200 bg-white p-4">
             <div class="mb-2 flex items-center justify-between">
               <span class="text-sm font-semibold text-ink-900">{h.name}</span>

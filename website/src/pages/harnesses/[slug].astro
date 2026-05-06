@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import CodeBlock from '../../components/CodeBlock.astro';
+import HarnessLogo from '../../components/HarnessLogo.astro';
 import { HARNESSES, type Harness } from '../../lib/harnesses';
 
 export function getStaticPaths() {
@@ -29,13 +30,7 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
         <span>{harness.slug}</span>
       </nav>
 
-      <span
-        class="inline-flex h-12 w-12 items-center justify-center rounded-xl text-white"
-        style={`background-color: ${harness.color};`}
-        aria-hidden="true"
-      >
-        ◉
-      </span>
+      <HarnessLogo harness={harness} size="h-14 w-14" />
       <h1 class="mt-4 text-3xl font-bold text-ink-900 sm:text-4xl">
         {harness.name}
       </h1>

@@ -2,11 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import AgentCard from '../components/AgentCard.astro';
 import CodeBlock from '../components/CodeBlock.astro';
-import { loadRootAgent } from '../lib/agents';
+import HarnessLogo from '../components/HarnessLogo.astro';
+import { loadRoots } from '../lib/agents';
 import { HARNESSES } from '../lib/harnesses';
 
-const root = loadRootAgent();
-const featured = [root, ...root.children];
+const roots = loadRoots();
+// Show every top-level template plus its direct children, capped to keep
+// the homepage tidy.
+const featured = roots.flatMap((r) => [r, ...r.children]).slice(0, 9);
 
 const base = import.meta.env.BASE_URL;
 const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
@@ -156,19 +159,13 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
         </a>
       </div>
 
-      <div class="grid gap-4 md:grid-cols-3">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {HARNESSES.map((h) => (
           <a
             href={link(`/harnesses/${h.slug}`)}
             class="group flex flex-col rounded-xl border border-ink-200 bg-ink-50 p-6 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-white"
           >
-            <span
-              class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white"
-              style={`background-color: ${h.color};`}
-              aria-hidden="true"
-            >
-              ◉
-            </span>
+            <HarnessLogo harness={h} size="h-10 w-10" />
             <h3 class="mt-4 text-lg font-semibold text-ink-900 group-hover:text-accent-700">
               {h.name}
             </h3>

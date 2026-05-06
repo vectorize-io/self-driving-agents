@@ -5,7 +5,23 @@ import matter from 'gray-matter';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../../..');
-const TEMPLATES_DIR = path.join(ROOT, 'marketing');
+
+/**
+ * Top-level repo dirs that are NOT agent templates and should be skipped
+ * when auto-discovering. Anything else with a bank-template.json shows up.
+ */
+const SKIP_AT_ROOT = new Set([
+  'node_modules',
+  'dist',
+  'website',
+  'src',
+  'public',
+  '.git',
+  '.github',
+  '.astro',
+  '.vscode',
+  '.idea',
+]);
 
 export interface AgentFile {
   fileName: string;
@@ -159,31 +175,42 @@ function buildNode(absDir: string, segments: string[]): AgentNode | null {
   };
 }
 
-let cached: AgentNode | null = null;
+let cachedRoots: AgentNode[] | null = null;
 
 /**
- * Load the top-level "marketing" agent (and recursively all sub-agents).
+ * Discover top-level agent templates by scanning the repo root for any
+ * directory containing a bank-template.json. Each match becomes a top-level
+ * agent and its subtree is loaded recursively.
+ *
+ * Drop a new directory like `engineering/bank-template.json` at the repo root
+ * and it shows up in the docs on the next build — no code changes needed.
  */
-export function loadRootAgent(): AgentNode {
-  if (cached) return cached;
-  const node = buildNode(TEMPLATES_DIR, ['marketing']);
-  if (!node) {
-    throw new Error(`No bank-template.json found in ${TEMPLATES_DIR}`);
+export function loadRoots(): AgentNode[] {
+  if (cachedRoots) return cachedRoots;
+  const entries = fs.readdirSync(ROOT, { withFileTypes: true });
+  const roots: AgentNode[] = [];
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    if (e.name.startsWith('.') || SKIP_AT_ROOT.has(e.name)) continue;
+    const node = buildNode(path.join(ROOT, e.name), [e.name]);
+    if (node) roots.push(node);
   }
-  cached = node;
-  return node;
+  roots.sort((a, b) => a.key.localeCompare(b.key));
+  cachedRoots = roots;
+  return roots;
 }
 
 /**
- * Flatten the tree into an array of all agent nodes (root + descendants).
+ * Flatten the tree into an array of every agent node across every top-level
+ * template (each root + all descendants).
  */
-export function flattenAgents(root: AgentNode = loadRootAgent()): AgentNode[] {
+export function flattenAgents(roots: AgentNode[] = loadRoots()): AgentNode[] {
   const out: AgentNode[] = [];
   const walk = (n: AgentNode) => {
     out.push(n);
     for (const c of n.children) walk(c);
   };
-  walk(root);
+  for (const r of roots) walk(r);
   return out;
 }
 

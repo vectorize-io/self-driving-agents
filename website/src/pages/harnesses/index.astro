@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import CodeBlock from '../../components/CodeBlock.astro';
+import HarnessLogo from '../../components/HarnessLogo.astro';
 import { HARNESSES } from '../../lib/harnesses';
 
 const base = import.meta.env.BASE_URL;
@@ -26,19 +27,13 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
 
   <section>
     <div class="mx-auto max-w-6xl px-6 py-12">
-      <div class="grid gap-6 md:grid-cols-3">
+      <div class="grid gap-6 sm:grid-cols-2">
         {HARNESSES.map((h) => (
           <a
             href={link(`/harnesses/${h.slug}`)}
             class="group flex flex-col rounded-xl border border-ink-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-accent-300 hover:shadow-md"
           >
-            <span
-              class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-white"
-              style={`background-color: ${h.color};`}
-              aria-hidden="true"
-            >
-              ◉
-            </span>
+            <HarnessLogo harness={h} size="h-12 w-12" />
             <h2 class="mt-4 text-xl font-semibold text-ink-900 group-hover:text-accent-700">
               {h.name}
             </h2>

@@ -1,10 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import AgentCard from '../../components/AgentCard.astro';
-import { loadRootAgent } from '../../lib/agents';
+import { loadRoots } from '../../lib/agents';
 
-const root = loadRootAgent();
-const all = [root, ...root.children];
+const roots = loadRoots();
+const all = roots.flatMap((r) => [r, ...r.children]);
 
 const base = import.meta.env.BASE_URL;
 const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;

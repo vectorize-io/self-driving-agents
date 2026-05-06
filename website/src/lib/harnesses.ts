@@ -14,9 +14,55 @@ export interface Harness {
   /** external links */
   links: { label: string; href: string }[];
   color: string;
+  /** path under /public, relative (no base prefix). square mark used in cards. */
+  logo: string;
+  /** optional wider wordmark for hero contexts. */
+  wordmark?: string;
 }
 
 export const HARNESSES: Harness[] = [
+  {
+    slug: 'claude-code',
+    name: 'Claude Code',
+    tagline:
+      'Anthropic\'s Claude Code CLI plus the Hindsight MCP server. No skill upload, no gateway.',
+    flag: '--harness claude-code',
+    intro:
+      'The claude-code harness pairs the Claude Code CLI with the Hindsight MCP server. The self-driving-agents CLI stages the agent files locally, auto-approves the Hindsight tools and create-agent skill in your Claude Code settings, and prints a one-line prompt you paste to finish the install.',
+    audience:
+      'Use this harness if you already use Claude Code in your terminal and want a self-driving agent backed by Hindsight memory — no skill zip, no separate gateway.',
+    steps: [
+      {
+        title: 'Install the agent',
+        body: 'The CLI copies the template content to ~/.self-driving-agents/claude-code/<agent>/ and updates ~/.claude/settings.json to allow the Hindsight MCP tools, the create-agent skill, and read-only Bash on the staged dir.',
+        code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness claude-code',
+      },
+      {
+        title: 'Make sure the Hindsight plugin is installed',
+        body:
+          'Claude Code reaches Hindsight via the hindsight-memory plugin (MCP server + create-agent skill). Install it once and you\'re set for every agent.',
+      },
+      {
+        title: 'Start Claude Code and paste the printed prompt',
+        body:
+          'Open Claude Code in any project. Paste the prompt the CLI printed at the end of install — it tells Claude to run /hindsight-memory:create-agent, ingest the staged files, and create the mental models declared in bank-template.json.',
+        code:
+          'Use /hindsight-memory:create-agent to create a "marketing-seo" agent. Then ingest all files from ~/.self-driving-agents/claude-code/marketing-seo/ (skip bank-template.json). Read ~/.self-driving-agents/claude-code/marketing-seo/bank-template.json and create the exact mental models (knowledge pages) defined in its "mental_models" array using agent_knowledge_create_page for each one.',
+      },
+    ],
+    howItWorks: [
+      'The CLI stages every .md/.txt plus bank-template.json under ~/.self-driving-agents/claude-code/<agent>/.',
+      'Your ~/.claude/settings.json gets allowedTools entries for mcp__hindsight__*, Skill(hindsight-memory:create-agent), and Bash(ls/cat ~/.self-driving-agents/*) so the next steps run without approval prompts.',
+      'When you run the printed prompt, the create-agent skill provisions the Hindsight bank, ingests the staged content as seed knowledge, and creates one knowledge page per mental_model from bank-template.json.',
+      'From then on, the agent uses the Hindsight MCP tools to load pages at session start, retain feedback during the chat, and update its own pages after the conversation ends.',
+    ],
+    links: [
+      { label: 'Claude Code', href: 'https://docs.anthropic.com/en/docs/claude-code' },
+      { label: 'Hindsight', href: 'https://github.com/vectorize-io/hindsight' },
+    ],
+    color: '#D97757',
+    logo: 'logos/claude.svg',
+  },
   {
     slug: 'claude',
     name: 'Claude Chat & Cowork',
@@ -56,7 +102,8 @@ export const HARNESSES: Harness[] = [
       { label: 'Claude.ai', href: 'https://claude.ai' },
       { label: 'Claude Skills docs', href: 'https://support.anthropic.com/' },
     ],
-    color: '#D97706',
+    color: '#D97757',
+    logo: 'logos/claude.svg',
   },
   {
     slug: 'openclaw',
@@ -90,13 +137,15 @@ export const HARNESSES: Harness[] = [
       'The seed .md files are ingested as initial facts so the agent ships with prior knowledge instead of starting blank.',
     ],
     links: [
-      { label: 'OpenClaw', href: 'https://openclaw.dev' },
+      { label: 'OpenClaw', href: 'https://github.com/openclaw/openclaw' },
       {
         label: 'Hindsight plugin',
         href: 'https://www.npmjs.com/package/@vectorize-io/hindsight-openclaw-plugin',
       },
     ],
-    color: '#059669',
+    color: '#E26B3A',
+    logo: 'logos/openclaw.svg',
+    wordmark: 'logos/openclaw-wordmark.svg',
   },
   {
     slug: 'nemoclaw',
@@ -133,6 +182,7 @@ export const HARNESSES: Harness[] = [
       { label: 'NVIDIA NeMo Agent', href: 'https://github.com/NVIDIA/NeMo-Agent' },
     ],
     color: '#76B900',
+    logo: 'logos/nvidia.svg',
   },
 ];
 
