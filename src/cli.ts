@@ -750,7 +750,7 @@ async function promptClaudeConfig(
     p.log.warn("Make sure your Hindsight instance is publicly accessible from Claude's servers.");
   }
 
-  const tokenInput = await p.text({ message: "Hindsight API token:" });
+  const tokenInput = await p.password({ message: "Hindsight API token:" });
   if (p.isCancel(tokenInput)) {
     p.cancel("Cancelled.");
     process.exit(0);
@@ -910,7 +910,7 @@ async function main() {
             p.cancel("Cancelled.");
             process.exit(0);
           }
-          const tokenInput = await p.text({ message: "Hindsight API token:" });
+          const tokenInput = await p.password({ message: "Hindsight API token:" });
           if (p.isCancel(tokenInput)) {
             p.cancel("Cancelled.");
             process.exit(0);
@@ -924,7 +924,7 @@ async function main() {
           p.cancel("Cancelled.");
           process.exit(0);
         }
-        const tokenInput = await p.text({ message: "Hindsight API token:" });
+        const tokenInput = await p.password({ message: "Hindsight API token:" });
         if (p.isCancel(tokenInput)) {
           p.cancel("Cancelled.");
           process.exit(0);
@@ -1135,7 +1135,6 @@ async function main() {
       [
         `Agent:     ${color.bold(agentId)}`,
         `Source:    ${color.dim(source)}`,
-        `Bank:      ${color.dim(bankId)}`,
         `API:       ${color.dim(apiUrl)}`,
         `Workspace: ${color.dim(workspaceDir)}`,
       ].join("\n")

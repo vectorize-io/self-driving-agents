@@ -53,7 +53,7 @@ function resolveFromPluginConfig(
   if (pc.dynamicBankId === false && pc.bankId) {
     bankId = pc.bankId;
   } else {
-    const granularity: string[] = pc.dynamicBankGranularity || ["agent", "channel", "user"];
+    const granularity: string[] = pc.dynamicBankGranularity || ["agent"];
     const fieldMap: Record<string, string> = {
       agent: agentId,
       channel: "unknown",
@@ -272,9 +272,11 @@ describe("resolveFromPluginConfig", () => {
     expect(result.bankId).toBe("my-agent::unknown::anonymous");
   });
 
-  it("uses default granularity when not specified", () => {
+  it("uses default granularity (agent-only) when not specified", () => {
+    // SDA forces ["agent"] in plugin config, so the dry-run preview default
+    // mirrors that. Multi-field granularity must be opted into explicitly.
     const result = resolveFromPluginConfig("my-agent", {});
-    expect(result.bankId).toBe("my-agent::unknown::anonymous");
+    expect(result.bankId).toBe("my-agent");
   });
 
   it("uses static bankId when dynamicBankId is false", () => {
@@ -296,8 +298,8 @@ describe("resolveFromPluginConfig", () => {
     expect(result.apiUrl).toBe("https://api.hindsight.vectorize.io");
     expect(result.apiToken).toBe("hsk_abc");
     // dynamicBankId=false but no bankId set, so falls through to dynamic path
-    // with bankIdPrefix
-    expect(result.bankId).toBe("my-sandbox-marketing-seo::unknown::anonymous");
+    // with bankIdPrefix and the agent-only default granularity
+    expect(result.bankId).toBe("my-sandbox-marketing-seo");
   });
 
   it("resolves nemoclaw-style config with static bankId", () => {
