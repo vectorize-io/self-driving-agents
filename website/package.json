@@ -1,20 +1,27 @@
 {
   "name": "self-driving-agents-website",
-  "type": "module",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "next dev --port 4321",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.10",
-    "astro": "^5.13.0",
     "gray-matter": "^4.0.3",
     "marked": "^15.0.0",
     "mermaid": "^11.14.0",
-    "tailwindcss": "^4.1.10"
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.7.0"
   }
 }

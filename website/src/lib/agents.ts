@@ -1,10 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '../../..');
+const ROOT = path.resolve(process.cwd(), '..');
 
 /**
  * Top-level repo dirs that are NOT agent templates and should be skipped
@@ -18,7 +16,7 @@ const SKIP_AT_ROOT = new Set([
   'public',
   '.git',
   '.github',
-  '.astro',
+  '.next',
   '.vscode',
   '.idea',
 ]);
@@ -38,9 +36,6 @@ export interface AgentFile {
 export interface BankTemplate {
   reflect_mission?: string;
   retain_mission?: string;
-  disposition_empathy?: number;
-  disposition_skepticism?: number;
-  disposition_literalism?: number;
   enable_observations?: boolean;
 }
 
@@ -51,40 +46,25 @@ export interface MentalModel {
   max_tokens?: number;
 }
 
-export interface Directive {
-  name: string;
-  content: string;
-  priority?: number;
-}
-
 export interface AgentNode {
-  /** path segments under TEMPLATES_DIR root, e.g. ["marketing", "seo"] */
   segments: string[];
-  /** slug joined by "/", e.g. "marketing/seo" */
   slug: string;
-  /** last segment (or root name) */
   key: string;
-  /** human readable display name */
   displayName: string;
-  /** the bank template config */
   bank: BankTemplate | null;
   mentalModels: MentalModel[];
-  directives: Directive[];
-  /** files in this directory only (not children) */
   files: AgentFile[];
-  /** sub-agents (subdirectories with bank-template.json) */
   children: AgentNode[];
-  /** total file count including children */
   totalFiles: number;
 }
 
 const TITLE_OVERRIDES: Record<string, string> = {
-  'marketing': 'Marketing',
-  'seo': 'SEO',
+  marketing: 'Marketing',
+  seo: 'SEO',
   'social-media': 'Social Media',
   'china-market': 'China Market',
-  'ecommerce': 'E-Commerce',
-  'content': 'Content',
+  ecommerce: 'E-Commerce',
+  content: 'Content',
 };
 
 function toDisplayName(key: string): string {
@@ -136,10 +116,7 @@ function buildNode(absDir: string, segments: string[]): AgentNode | null {
   const tpl = safeReadJson<{
     bank?: BankTemplate;
     mental_models?: MentalModel[];
-    directives?: Directive[];
   }>(bankTemplatePath);
-
-  // a directory is an agent only if it has a bank-template.json
   if (!tpl) return null;
 
   const entries = fs.readdirSync(absDir, { withFileTypes: true });
@@ -168,7 +145,6 @@ function buildNode(absDir: string, segments: string[]): AgentNode | null {
     displayName: toDisplayName(key),
     bank: tpl.bank ?? null,
     mentalModels: tpl.mental_models ?? [],
-    directives: tpl.directives ?? [],
     files,
     children,
     totalFiles,
@@ -181,9 +157,6 @@ let cachedRoots: AgentNode[] | null = null;
  * Discover top-level agent templates by scanning the repo root for any
  * directory containing a bank-template.json. Each match becomes a top-level
  * agent and its subtree is loaded recursively.
- *
- * Drop a new directory like `engineering/bank-template.json` at the repo root
- * and it shows up in the docs on the next build — no code changes needed.
  */
 export function loadRoots(): AgentNode[] {
   if (cachedRoots) return cachedRoots;
@@ -200,10 +173,6 @@ export function loadRoots(): AgentNode[] {
   return roots;
 }
 
-/**
- * Flatten the tree into an array of every agent node across every top-level
- * template (each root + all descendants).
- */
 export function flattenAgents(roots: AgentNode[] = loadRoots()): AgentNode[] {
   const out: AgentNode[] = [];
   const walk = (n: AgentNode) => {
@@ -214,9 +183,6 @@ export function flattenAgents(roots: AgentNode[] = loadRoots()): AgentNode[] {
   return out;
 }
 
-/**
- * Find an agent node by slug.
- */
 export function findAgent(slug: string): AgentNode | undefined {
   return flattenAgents().find((n) => n.slug === slug);
 }

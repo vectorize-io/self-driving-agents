@@ -47,7 +47,7 @@ pre {
   overflow-x: auto;
 }
 
-/* Markdown content */
+/* Markdown content rendered from agent files */
 .prose-doc {
   line-height: 1.7;
   color: var(--color-ink-700);

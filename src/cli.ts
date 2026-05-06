@@ -908,7 +908,88 @@ async function main() {
       bankId = claudeConfig.bankId;
       apiToken = claudeConfig.apiToken;
     } else if (harness === "claude-code") {
-      // Claude Code: just save content locally, Claude handles the rest via skill
+      // Step 1: Ensure Claude Code CLI is available
+      try {
+        execSync("which claude", { stdio: "pipe" });
+      } catch {
+        p.cancel(
+          "Claude Code CLI not found. Install it:\n  npm install -g @anthropic-ai/claude-code"
+        );
+        process.exit(1);
+      }
+
+      // Step 2: Ensure marketplace + plugin installed
+      const MARKETPLACE_REPO = "vectorize-io/hindsight";
+      const MARKETPLACE_NAME = "vectorize-io-hindsight";
+      const PLUGIN_NAME = "hindsight-memory";
+
+      let hasMarketplace = false;
+      try {
+        const out = execSync("claude plugin marketplace list", { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] });
+        hasMarketplace = out.includes(MARKETPLACE_NAME) || out.includes(MARKETPLACE_REPO);
+      } catch { /* ignore */ }
+
+      if (!hasMarketplace) {
+        p.log.info("Adding Hindsight marketplace...");
+        try {
+          execSync(`claude plugin marketplace add ${MARKETPLACE_REPO}`, { stdio: "inherit" });
+          p.log.success("Marketplace added");
+        } catch (err: any) {
+          const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
+          if (!msg.includes("already")) {
+            p.log.warn(`Failed to add marketplace: ${msg}`);
+          }
+        }
+      }
+
+      let pluginInstalled = false;
+      try {
+        const out = execSync("claude plugin list", { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] });
+        pluginInstalled = out.includes(PLUGIN_NAME);
+      } catch { /* ignore */ }
+
+      if (!pluginInstalled) {
+        p.log.info("Installing hindsight-memory plugin...");
+        try {
+          execSync(`claude plugin install ${PLUGIN_NAME}@${MARKETPLACE_NAME}`, { stdio: "inherit" });
+          p.log.success("Plugin installed");
+        } catch (err: any) {
+          const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
+          p.log.warn(`Failed to install plugin: ${msg}`);
+        }
+      } else {
+        // Update to latest
+        p.log.info("Updating hindsight-memory plugin...");
+        try {
+          execSync(`claude plugin update ${PLUGIN_NAME}@${MARKETPLACE_NAME}`, { stdio: "pipe" });
+          p.log.success("Plugin up to date");
+        } catch { /* ignore */ }
+      }
+
+      // Step 3: Configure Hindsight connection in ~/.hindsight/claude-code.json
+      const ccConfigDir = join(homedir(), ".hindsight");
+      const ccConfigPath = join(ccConfigDir, "claude-code.json");
+      let ccConfig: Record<string, any> = {};
+      if (existsSync(ccConfigPath)) {
+        try { ccConfig = JSON.parse(readFileSync(ccConfigPath, "utf-8")); } catch { /* ignore */ }
+      }
+
+      const hasConnection = ccConfig.hindsightApiUrl || ccConfig.llmProvider;
+      if (!hasConnection && process.stdin.isTTY) {
+        const claudeConfig = await promptClaudeConfig(agentId);
+        ccConfig.hindsightApiUrl = claudeConfig.apiUrl;
+        ccConfig.hindsightApiToken = claudeConfig.apiToken;
+        ccConfig.enableKnowledgeTools = true;
+        mkdirSync(ccConfigDir, { recursive: true });
+        writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
+        p.log.success(`Hindsight connection saved to ${color.dim(ccConfigPath)}`);
+      } else if (!ccConfig.enableKnowledgeTools) {
+        ccConfig.enableKnowledgeTools = true;
+        mkdirSync(ccConfigDir, { recursive: true });
+        writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
+      }
+
+      // Step 4: Save content locally for the agent
       const contentDir = join(homedir(), ".self-driving-agents", "claude-code", agentId);
       mkdirSync(contentDir, { recursive: true });
       // Copy content files to the local dir
