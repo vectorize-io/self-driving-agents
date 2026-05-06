@@ -11,6 +11,11 @@ export interface Harness {
   steps: { title: string; body: string; code?: string }[];
   /** how it works under the hood */
   howItWorks: string[];
+  /** how the agent is bound to a Hindsight bank in this harness */
+  bankMapping: {
+    summary: string;
+    details: string[];
+  };
   /** external links */
   links: { label: string; href: string }[];
   color: string;
@@ -56,6 +61,15 @@ export const HARNESSES: Harness[] = [
       'When you run the printed prompt, the create-agent skill provisions the Hindsight bank, ingests the staged content as seed knowledge, and creates one knowledge page per mental_model from bank-template.json.',
       'From then on, the agent uses the Hindsight MCP tools to load pages at session start, retain feedback during the chat, and update its own pages after the conversation ends.',
     ],
+    bankMapping: {
+      summary:
+        'The bank is provisioned by /hindsight-memory:create-agent against the Hindsight account configured in Claude Code\'s MCP server.',
+      details: [
+        'The Hindsight MCP server in Claude Code is the single source of truth for which Hindsight tenant is used — point it at Cloud or your self-hosted instance before running the prompt.',
+        'By default, the create-agent skill names the bank after the agent (e.g. marketing-seo). To use a different name, edit the agent name in the prompt the CLI printed before pasting it.',
+        'To re-map an existing agent to a different bank, run /hindsight-memory:create-agent again with the new name — the staged files at ~/.self-driving-agents/claude-code/<agent>/ are reused.',
+      ],
+    },
     links: [
       { label: 'Claude Code', href: 'https://docs.anthropic.com/en/docs/claude-code' },
       { label: 'Hindsight', href: 'https://github.com/vectorize-io/hindsight' },
@@ -98,6 +112,16 @@ export const HARNESSES: Harness[] = [
       'A skill zip is generated with the bank ID and API token baked in — no external dependencies.',
       'When you invoke the skill, Claude loads the latest knowledge pages, retains feedback during the conversation, and updates pages after the session.',
     ],
+    bankMapping: {
+      summary:
+        'The Hindsight API URL, API token, and bank ID are baked into the generated skill zip at install time. The CLI prompts for all three.',
+      details: [
+        'During install you pick Cloud (api.hindsight.vectorize.io) or self-hosted, paste an API token, and choose a Bank ID — defaulted to the agent name (e.g. marketing-seo).',
+        'Those values are written into the skill\'s SKILL.md and called via curl from the skill at runtime. There is no in-Claude config — re-binding requires regenerating and re-uploading the zip.',
+        'To re-map the agent to a different bank: re-run npx @vectorize-io/self-driving-agents install ... --harness claude with a new Bank ID, then upload the new zip via Customize → Skills.',
+        'Self-hosted Hindsight must be publicly reachable from Claude\'s servers — localhost URLs are rejected at install time.',
+      ],
+    },
     links: [
       { label: 'Claude.ai', href: 'https://claude.ai' },
       { label: 'Claude Skills docs', href: 'https://support.anthropic.com/' },
@@ -136,6 +160,16 @@ export const HARNESSES: Harness[] = [
       'Knowledge pages from bank-template.json are exposed to the agent as tools — load_knowledge, retain_message, manage_pages.',
       'The seed .md files are ingested as initial facts so the agent ships with prior knowledge instead of starting blank.',
     ],
+    bankMapping: {
+      summary:
+        'The hindsight-openclaw plugin holds the Hindsight connection. By default each OpenClaw workspace maps 1:1 to a Hindsight bank named after the workspace.',
+      details: [
+        'Connection lives under plugins.entries["hindsight-openclaw"].config in your OpenClaw config — fields hindsightApiUrl, hindsightApiToken, and bank-resolution settings.',
+        'In dynamic mode (default), bank ID = workspace name, optionally with bankIdPrefix. Set dynamicBankId: false plus bankId: <fixed> to share one bank across multiple workspaces.',
+        'The first --harness openclaw install runs the plugin\'s setup wizard (npx --yes --package @vectorize-io/hindsight-openclaw hindsight-openclaw-setup); subsequent installs reuse the same connection and just add a new workspace.',
+        'To re-map: edit the plugin config and restart the gateway, or re-run hindsight-openclaw-setup to update the wizard answers.',
+      ],
+    },
     links: [
       { label: 'OpenClaw', href: 'https://github.com/openclaw/openclaw' },
       {
@@ -178,6 +212,16 @@ export const HARNESSES: Harness[] = [
       'Seed knowledge from the agent directory is ingested before the first conversation.',
       'Knowledge pages are kept up to date by Hindsight as the agent runs.',
     ],
+    bankMapping: {
+      summary:
+        'The hindsight-nemoclaw plugin holds the Hindsight connection per sandbox. Bank IDs are namespaced with a configurable prefix (default: "nemoclaw").',
+      details: [
+        'The setup wizard (npx --yes --package @vectorize-io/hindsight-nemoclaw hindsight-nemoclaw setup --sandbox <name>) writes hindsightApiUrl and hindsightApiToken into the sandbox\'s plugin config. Run it once per sandbox.',
+        'Bank ID resolves as <bankIdPrefix>-<workspace>; default prefix is "nemoclaw" so a workspace called marketing-seo lands in bank nemoclaw-marketing-seo. Override bankIdPrefix in plugin config to group sandboxes.',
+        'Subsequent installs into the same sandbox reuse the existing connection without re-prompting.',
+        'To re-map: edit plugin config (or re-run the setup wizard) and restart the NemoClaw gateway.',
+      ],
+    },
     links: [
       { label: 'NVIDIA NeMo Agent', href: 'https://github.com/NVIDIA/NeMo-Agent' },
     ],
