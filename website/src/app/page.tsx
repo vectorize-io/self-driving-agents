@@ -31,10 +31,10 @@ export default function HomePage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href={link('/quickstart')}
+                href={link('/create')}
                 className="rounded-lg bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-600"
               >
-                Quick start →
+                Create your own →
               </Link>
               <Link
                 href={link('/agents')}
@@ -106,7 +106,7 @@ export default function HomePage() {
           </div>
 
           <Link
-            href={link('/concepts')}
+            href={link('/concept')}
             className="group mt-8 flex flex-wrap items-start gap-4 rounded-xl border border-accent-200 bg-accent-50/50 p-5 transition hover:border-accent-300 hover:bg-accent-50"
           >
             <span
@@ -120,17 +120,16 @@ export default function HomePage() {
                 Want the deeper picture?
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-ink-600">
-                Each agent has a personal wiki — knowledge pages it loads at startup,
-                backed by raw memories in a Hindsight bank. Hindsight regenerates
-                the pages from those memories on every consolidation. Read the
-                concepts page for the full data model and flow.
+                See how the harness, the agent, and Hindsight fit together —
+                what crosses the boundary, what stays server-side, and why
+                pages and memories live in two layers.
               </p>
             </div>
             <span
               className="self-center text-sm font-semibold text-accent-600 group-hover:underline"
               aria-hidden
             >
-              Read concepts →
+              Read the concept →
             </span>
           </Link>
         </div>

@@ -19,8 +19,8 @@ export function Footer() {
           </span>
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <Link href={link('/concepts')} className="hover:text-ink-900">
-            Concepts
+          <Link href={link('/concept')} className="hover:text-ink-900">
+            Concept
           </Link>
           <Link href={link('/agents')} className="hover:text-ink-900">
             Agents

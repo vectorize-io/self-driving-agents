@@ -103,32 +103,22 @@ export default async function HarnessDetailPage({
             Where the agent → bank binding lives, and how to change it.
           </p>
 
-          <div
-            className="mt-5 rounded-xl border-l-4 border-accent-500 bg-white p-5"
+          <aside
+            className="mt-5 rounded-xl bg-accent-50/60 p-5 ring-1 ring-inset ring-accent-200"
             role="note"
           >
-            <div className="flex items-start gap-3">
-              <span
-                className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-500 text-xs font-bold text-white"
-                aria-hidden
-              >
-                i
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-ink-900">
-                  {harness.bankMapping.summary}
-                </p>
-                <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ink-700">
-                  {harness.bankMapping.details.map((line, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+            <p className="text-sm font-semibold text-ink-900">
+              {harness.bankMapping.summary}
+            </p>
+            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ink-700">
+              {harness.bankMapping.details.map((line, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          </aside>
         </div>
       </section>
 

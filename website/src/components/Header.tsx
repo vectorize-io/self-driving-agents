@@ -3,10 +3,10 @@ import { link } from '@/lib/link';
 
 const NAV = [
   { href: link('/'), label: 'Home' },
-  { href: link('/concepts'), label: 'Concepts' },
+  { href: link('/concept'), label: 'Concept' },
   { href: link('/agents'), label: 'Agents' },
   { href: link('/harnesses'), label: 'Harnesses' },
-  { href: link('/quickstart'), label: 'Quick start' },
+  { href: link('/create'), label: 'Create your own' },
 ];
 
 export function Header() {

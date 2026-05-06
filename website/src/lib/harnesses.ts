@@ -20,48 +20,61 @@ export const HARNESSES: Harness[] = [
     slug: 'claude-code',
     name: 'Claude Code',
     tagline:
-      'Anthropic\'s Claude Code CLI plus the Hindsight MCP server. No skill upload, no gateway.',
+      'Anthropic\'s Claude Code CLI with the Hindsight Memory plugin — auto-recall, auto-retain, and the agent_knowledge_* tools, all wired in.',
     flag: '--harness claude-code',
     intro:
-      'The claude-code harness pairs the Claude Code CLI with the Hindsight MCP server. The self-driving-agents CLI stages the agent files locally, auto-approves the Hindsight tools and create-agent skill in your Claude Code settings, and prints a one-line prompt you paste to finish the install.',
+      'The claude-code harness drops the Hindsight Memory plugin into Claude Code. The plugin\'s hooks auto-recall relevant memories before every user prompt and auto-retain the conversation after every response; its MCP server exposes the agent_knowledge_* tools for managing pages and ingesting content. The self-driving-agents CLI takes care of installing the plugin, configuring the Hindsight connection, staging seed content, and allowlisting the right tools.',
     audience:
       'Use this harness if you already use Claude Code in your terminal and want a self-driving agent backed by Hindsight memory — no skill zip, no separate gateway.',
     steps: [
       {
         title: 'Install the agent',
-        body: 'The CLI copies the template content to ~/.self-driving-agents/claude-code/<agent>/ and updates ~/.claude/settings.json to allow the Hindsight MCP tools, the create-agent skill, and read-only Bash on the staged dir.',
+        body:
+          'Verifies `claude` is on PATH; adds the `vectorize-io/hindsight` plugin marketplace and installs (or updates) the `hindsight-memory` plugin; prompts for your Hindsight connection if you don\'t already have one configured; writes plugin config to `~/.hindsight/claude-code.json`; stages content under `~/.self-driving-agents/claude-code/<agent>/`; allowlists the plugin tools and the create-agent skill in `~/.claude/settings.json`.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness claude-code',
       },
       {
-        title: 'Make sure the Hindsight plugin is installed',
+        title: 'cd into the project directory the agent should be scoped to',
         body:
-          'Claude Code reaches Hindsight via the hindsight-memory plugin (MCP server + create-agent skill). Install it once and you\'re set for every agent.',
+          'The bank is derived from `(agent_name, project_basename)` — the working directory at session start is part of the binding. Always start `claude` from the same project directory if you want this agent to keep the same memory across sessions.',
       },
       {
-        title: 'Start Claude Code and paste the printed prompt',
+        title: 'Start Claude Code',
         body:
-          'Open Claude Code in any project. Paste the prompt the CLI printed at the end of install — it tells Claude to run /hindsight-memory:create-agent, ingest the staged files, and create the mental models declared in bank-template.json.',
-        code:
-          'Use /hindsight-memory:create-agent to create a "marketing-seo" agent. Then ingest all files from ~/.self-driving-agents/claude-code/marketing-seo/ (skip bank-template.json). Read ~/.self-driving-agents/claude-code/marketing-seo/bank-template.json and create the exact mental models (knowledge pages) defined in its "mental_models" array using agent_knowledge_create_page for each one.',
+          'Run `claude` in that directory. The plugin\'s session-start hook health-checks Hindsight, so if the connection is wrong you\'ll see it immediately.',
+        code: 'claude',
+      },
+      {
+        title: 'Run the printed prompt',
+        body:
+          'The CLI printed a one-liner at the end of install. Pasting it triggers the create-agent skill, which writes a Claude Code subagent at `~/.claude/agents/<name>.md` wired up to the Hindsight MCP, ingests every staged file via `agent_knowledge_ingest_file`, and creates three initial knowledge pages.',
+        code: '/hindsight-memory:create-agent marketing-seo from ~/.self-driving-agents/claude-code/marketing-seo',
       },
     ],
     howItWorks: [
-      'The CLI stages every .md/.txt plus bank-template.json under ~/.self-driving-agents/claude-code/<agent>/.',
-      'Your ~/.claude/settings.json gets allowedTools entries for mcp__hindsight__*, Skill(hindsight-memory:create-agent), and Bash(ls/cat ~/.self-driving-agents/*) so the next steps run without approval prompts.',
-      'When you run the printed prompt, the create-agent skill provisions the Hindsight bank, ingests the staged content as seed knowledge, and creates one knowledge page per mental_model from bank-template.json.',
-      'From then on, the agent uses the Hindsight MCP tools to load pages at session start, retain feedback during the chat, and update its own pages after the conversation ends.',
+      'The Hindsight Memory plugin is installed via Claude Code\'s plugin marketplace (`vectorize-io/hindsight` → `hindsight-memory`). It bundles four hooks, an MCP server, and the create-agent skill.',
+      'Hooks: `SessionStart` runs a health check; `UserPromptSubmit` auto-recalls relevant memories and injects them as invisible `additionalContext`; `Stop` auto-retains the transcript with chunked retention (default: every 10 turns with 2-turn overlap); `SessionEnd` cleans up the auto-managed daemon if one was started.',
+      'MCP server (stdio): exposes `agent_knowledge_list_pages`, `get_page`, `create_page`, `update_page`, `delete_page`, `recall`, `ingest`, `ingest_file`, and `get_current_bank`. The bank ID is auto-resolved at runtime — tools never take a `bank_id` parameter.',
+      'Connection lives in `~/.hindsight/claude-code.json`. Three modes are supported: external Hindsight server (set `hindsightApiUrl` + `hindsightApiToken`), auto-managed local daemon (leave URL empty; the plugin starts `hindsight-embed` via `uvx` and uses an LLM key like `OPENAI_API_KEY` for fact extraction), or an existing local daemon.',
+      'Tool/skill allowlist in `~/.claude/settings.json` under `permissions.allow`: `mcp__plugin_hindsight-memory_hindsight__*`, `Skill(hindsight-memory:create-agent)`, `Bash(ls ~/.self-driving-agents/*)`, `Bash(cat ~/.self-driving-agents/*)` — so the next steps run without approval prompts.',
     ],
     bankMapping: {
       summary:
-        'The bank is provisioned by /hindsight-memory:create-agent against the Hindsight account configured in Claude Code\'s MCP server.',
+        'Per-(agent, project) bank derivation. Same agent in two different project directories means two different banks. Plugin config and connection live in `~/.hindsight/claude-code.json`.',
       details: [
-        'The Hindsight MCP server in Claude Code is the single source of truth for which Hindsight tenant is used — point it at Cloud or your self-hosted instance before running the prompt.',
-        'By default the create-agent skill names the bank after the agent (e.g. marketing-seo). To use a different name, edit the agent name in the prompt the CLI printed before pasting it.',
-        'To re-map an existing agent to a different bank, run /hindsight-memory:create-agent again with the new name — the staged files at ~/.self-driving-agents/claude-code/<agent>/ are reused.',
+        'The CLI sets `dynamicBankId: true` and `dynamicBankGranularity: ["agent", "project"]` in `~/.hindsight/claude-code.json`. The plugin combines the agent name and the project basename (cwd) into the bank ID at runtime.',
+        'It also sets `enableKnowledgeTools: true` so the MCP server exposes the `agent_knowledge_*` tools.',
+        'Connection: `hindsightApiUrl` + `hindsightApiToken` in the same file (external Hindsight server). Leave the URL empty to run a local `hindsight-embed` daemon — that mode needs an LLM key (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) for fact extraction.',
+        'To re-map: change the agent name or the project directory (creates a new bank), or edit `~/.hindsight/claude-code.json` directly. The CLI deliberately bails if it sees `dynamicBankId: false` plus a static `bankId` — that conflicts with self-driving-agents\' per-(agent, project) isolation.',
+        'Auto-recall and auto-retain default to memory types `["world", "experience"]`. Observations are not pulled by default — they\'re the synthesised layer the refresh engine writes against.',
       ],
     },
     links: [
       { label: 'Claude Code', href: 'https://docs.anthropic.com/en/docs/claude-code' },
+      {
+        label: 'Hindsight Memory plugin',
+        href: 'https://github.com/vectorize-io/hindsight/tree/main/integrations/claude-code',
+      },
       { label: 'Hindsight', href: 'https://github.com/vectorize-io/hindsight' },
     ],
     color: '#D97757',
