@@ -958,12 +958,18 @@ async function main() {
           p.log.warn(`Failed to install plugin: ${msg}`);
         }
       } else {
-        // Update to latest
-        p.log.info("Updating hindsight-memory plugin...");
+        // Refresh marketplace catalog and update plugin to latest
+        p.log.info("Updating hindsight-memory plugin to latest version...");
         try {
-          execSync(`claude plugin update ${PLUGIN_NAME}@${MARKETPLACE_NAME}`, { stdio: "pipe" });
-          p.log.success("Plugin up to date");
-        } catch { /* ignore */ }
+          execSync(`claude plugin marketplace update ${MARKETPLACE_NAME}`, { stdio: "pipe" });
+        } catch { /* ignore — marketplace update is best-effort */ }
+        try {
+          execSync(`claude plugin update ${PLUGIN_NAME}@${MARKETPLACE_NAME}`, { stdio: "inherit" });
+          p.log.success("Plugin updated to latest");
+        } catch (err: any) {
+          const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
+          p.log.warn(`Failed to update plugin: ${msg}`);
+        }
       }
 
       // Step 3: Configure Hindsight connection in ~/.hindsight/claude-code.json

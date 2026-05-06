@@ -625,3 +625,174 @@ describe("harness validation", () => {
     expect(SUPPORTED_HARNESSES.includes("")).toBe(false);
   });
 });
+
+// ── Claude Code plugin lifecycle decisions ──
+
+describe("claude-code plugin install/update logic", () => {
+  // Mirrors the decision logic in cli.ts:
+  //   - if plugin not in `claude plugin list` output → install
+  //   - else → run `claude plugin marketplace update` + `claude plugin update`
+  function shouldInstall(pluginListOutput: string, pluginName: string): boolean {
+    return !pluginListOutput.includes(pluginName);
+  }
+
+  function shouldUpdate(pluginListOutput: string, pluginName: string): boolean {
+    return pluginListOutput.includes(pluginName);
+  }
+
+  it("installs when plugin not present", () => {
+    const out = "Installed plugins:\n  ❯ rust-analyzer-lsp@claude-plugins-official\n    Version: 1.0.0";
+    expect(shouldInstall(out, "hindsight-memory")).toBe(true);
+    expect(shouldUpdate(out, "hindsight-memory")).toBe(false);
+  });
+
+  it("updates when plugin already present", () => {
+    const out = "Installed plugins:\n  ❯ hindsight-memory@vectorize-io-hindsight\n    Version: 0.5.0";
+    expect(shouldInstall(out, "hindsight-memory")).toBe(false);
+    expect(shouldUpdate(out, "hindsight-memory")).toBe(true);
+  });
+
+  it("detects plugin regardless of installed scope", () => {
+    const userScope = "  ❯ hindsight-memory@vectorize-io-hindsight\n    Scope: user";
+    const localScope = "  ❯ hindsight-memory@vectorize-io-hindsight\n    Scope: local";
+    expect(shouldUpdate(userScope, "hindsight-memory")).toBe(true);
+    expect(shouldUpdate(localScope, "hindsight-memory")).toBe(true);
+  });
+});
+
+describe("claude-code marketplace detection", () => {
+  // Mirrors the marketplace-add decision: if neither name nor repo is in the
+  // `claude plugin marketplace list` output, we run `claude plugin marketplace add`.
+  function hasMarketplace(out: string, name: string, repo: string): boolean {
+    return out.includes(name) || out.includes(repo);
+  }
+
+  const MARKETPLACE_NAME = "vectorize-io-hindsight";
+  const MARKETPLACE_REPO = "vectorize-io/hindsight";
+
+  it("detects when marketplace already added by name", () => {
+    const out = "Configured marketplaces:\n  vectorize-io-hindsight (github: vectorize-io/hindsight)";
+    expect(hasMarketplace(out, MARKETPLACE_NAME, MARKETPLACE_REPO)).toBe(true);
+  });
+
+  it("detects when marketplace already added by repo", () => {
+    const out = "Configured marketplaces:\n  some-other-name (github: vectorize-io/hindsight)";
+    expect(hasMarketplace(out, MARKETPLACE_NAME, MARKETPLACE_REPO)).toBe(true);
+  });
+
+  it("returns false when marketplace not added", () => {
+    const out = "Configured marketplaces:\n  claude-plugins-official";
+    expect(hasMarketplace(out, MARKETPLACE_NAME, MARKETPLACE_REPO)).toBe(false);
+  });
+
+  it("returns false on empty marketplace list", () => {
+    expect(hasMarketplace("", MARKETPLACE_NAME, MARKETPLACE_REPO)).toBe(false);
+  });
+});
+
+describe("claude-code allowed-tools merge", () => {
+  // Mirrors the auto-approve logic that merges entries into ~/.claude/settings.json's allowedTools.
+  function mergeAllowed(existing: string[], toAdd: string[]): { merged: string[]; updated: boolean } {
+    const merged = [...existing];
+    let updated = false;
+    for (const tool of toAdd) {
+      if (!merged.includes(tool)) {
+        merged.push(tool);
+        updated = true;
+      }
+    }
+    return { merged, updated };
+  }
+
+  const HINDSIGHT_TOOLS = [
+    "mcp__hindsight__*",
+    "Skill(hindsight-memory:create-agent)",
+    "Bash(ls ~/.self-driving-agents/*)",
+    "Bash(cat ~/.self-driving-agents/*)",
+  ];
+
+  it("adds all tools to empty allowedTools", () => {
+    const { merged, updated } = mergeAllowed([], HINDSIGHT_TOOLS);
+    expect(updated).toBe(true);
+    expect(merged).toEqual(HINDSIGHT_TOOLS);
+  });
+
+  it("preserves existing entries", () => {
+    const { merged } = mergeAllowed(["Bash(npm *)", "Read"], HINDSIGHT_TOOLS);
+    expect(merged).toContain("Bash(npm *)");
+    expect(merged).toContain("Read");
+    expect(merged).toContain("mcp__hindsight__*");
+  });
+
+  it("does not duplicate when already present", () => {
+    const existing = [...HINDSIGHT_TOOLS];
+    const { merged, updated } = mergeAllowed(existing, HINDSIGHT_TOOLS);
+    expect(updated).toBe(false);
+    expect(merged).toHaveLength(HINDSIGHT_TOOLS.length);
+  });
+
+  it("only adds missing entries", () => {
+    const existing = ["mcp__hindsight__*"];
+    const { merged, updated } = mergeAllowed(existing, HINDSIGHT_TOOLS);
+    expect(updated).toBe(true);
+    expect(merged).toHaveLength(HINDSIGHT_TOOLS.length);
+  });
+});
+
+describe("claude-code Hindsight config persistence", () => {
+  // Mirrors the config-write logic: if existing config has a connection
+  // (hindsightApiUrl or llmProvider), don't prompt; otherwise prompt.
+  function shouldPromptConnection(config: Record<string, any>): boolean {
+    return !config.hindsightApiUrl && !config.llmProvider;
+  }
+
+  function applyClaudeConfig(
+    existing: Record<string, any>,
+    prompted: { apiUrl: string; apiToken?: string }
+  ): Record<string, any> {
+    return {
+      ...existing,
+      hindsightApiUrl: prompted.apiUrl,
+      hindsightApiToken: prompted.apiToken,
+      enableKnowledgeTools: true,
+    };
+  }
+
+  it("prompts on first install (empty config)", () => {
+    expect(shouldPromptConnection({})).toBe(true);
+  });
+
+  it("skips prompt when hindsightApiUrl already set", () => {
+    expect(shouldPromptConnection({ hindsightApiUrl: "https://api.example.com" })).toBe(false);
+  });
+
+  it("skips prompt when llmProvider already set (local daemon mode)", () => {
+    expect(shouldPromptConnection({ llmProvider: "openai" })).toBe(false);
+  });
+
+  it("writes Cloud connection on first install", () => {
+    const result = applyClaudeConfig({}, {
+      apiUrl: "https://api.hindsight.vectorize.io",
+      apiToken: "hsk_abc",
+    });
+    expect(result.hindsightApiUrl).toBe("https://api.hindsight.vectorize.io");
+    expect(result.hindsightApiToken).toBe("hsk_abc");
+    expect(result.enableKnowledgeTools).toBe(true);
+  });
+
+  it("preserves other settings when applying connection", () => {
+    const existing = { debug: true, retainEveryNTurns: 1 };
+    const result = applyClaudeConfig(existing, { apiUrl: "https://x.com", apiToken: "t" });
+    expect(result.debug).toBe(true);
+    expect(result.retainEveryNTurns).toBe(1);
+    expect(result.hindsightApiUrl).toBe("https://x.com");
+  });
+
+  it("always sets enableKnowledgeTools=true", () => {
+    const result = applyClaudeConfig(
+      { enableKnowledgeTools: false },
+      { apiUrl: "https://x.com", apiToken: "t" }
+    );
+    expect(result.enableKnowledgeTools).toBe(true);
+  });
+});
