@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "ui-sans-serif", "system-ui", "sans-serif";
+  --font-mono: "JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "monospace";
+
+  --color-ink-50:  #f7f7f8;
+  --color-ink-100: #ececef;
+  --color-ink-200: #d6d6dc;
+  --color-ink-300: #a8a8b3;
+  --color-ink-400: #71717f;
+  --color-ink-500: #52525c;
+  --color-ink-600: #3a3a42;
+  --color-ink-700: #27272d;
+  --color-ink-800: #18181c;
+  --color-ink-900: #0d0d10;
+
+  --color-accent-50:  #eef4ff;
+  --color-accent-100: #d9e6ff;
+  --color-accent-200: #b7ceff;
+  --color-accent-300: #88aaff;
+  --color-accent-400: #5e84fb;
+  --color-accent-500: #3a5ef0;
+  --color-accent-600: #2a45c8;
+  --color-accent-700: #2438a0;
+  --color-accent-800: #1d2c7a;
+  --color-accent-900: #131e54;
+}
+
+html {
+  font-family: var(--font-sans);
+  background: var(--color-ink-50);
+  color: var(--color-ink-800);
+}
+
+body {
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+pre {
+  overflow-x: auto;
+}
+
+/* Markdown content */
+.prose-doc {
+  line-height: 1.7;
+  color: var(--color-ink-700);
+}
+.prose-doc h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-ink-900);
+}
+.prose-doc h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink-900);
+}
+.prose-doc h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-ink-900);
+}
+.prose-doc p { margin: 0.6rem 0; }
+.prose-doc ul, .prose-doc ol { margin: 0.6rem 0 0.6rem 1.25rem; }
+.prose-doc ul { list-style: disc; }
+.prose-doc ol { list-style: decimal; }
+.prose-doc li { margin: 0.2rem 0; }
+.prose-doc a { color: var(--color-accent-600); text-decoration: underline; }
+.prose-doc a:hover { color: var(--color-accent-700); }
+.prose-doc code {
+  background: var(--color-ink-100);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.prose-doc pre {
+  background: var(--color-ink-900);
+  color: var(--color-ink-100);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.prose-doc pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+.prose-doc blockquote {
+  border-left: 3px solid var(--color-accent-300);
+  padding-left: 1rem;
+  color: var(--color-ink-500);
+  margin: 1rem 0;
+}
+.prose-doc table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+.prose-doc th, .prose-doc td {
+  border: 1px solid var(--color-ink-200);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-doc th {
+  background: var(--color-ink-100);
+  font-weight: 600;
+}
+.prose-doc strong { color: var(--color-ink-900); }

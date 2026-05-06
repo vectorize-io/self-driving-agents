@@ -4,6 +4,8 @@ Agents that learn from every conversation and get better over time.
 
 No retraining, no manual updates — just use them and they improve. Powered by [Hindsight](https://github.com/vectorize-io/hindsight), so agent memory is portable across harnesses.
 
+📖 **Docs:** <https://vectorize-io.github.io/self-driving-agents/>
+
 ## Quick start
 
 ### Claude Chat / Cowork

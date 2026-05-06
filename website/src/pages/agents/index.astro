@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AgentCard from '../../components/AgentCard.astro';
+import { loadRootAgent } from '../../lib/agents';
+
+const root = loadRootAgent();
+const all = [root, ...root.children];
+
+const base = import.meta.env.BASE_URL;
+const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
+---
+
+<Layout
+  title="Agents"
+  description="Browse all available self-driving agent templates: marketing, SEO, social media, content, ecommerce, China market."
+>
+  <section class="border-b border-ink-200 bg-white">
+    <div class="mx-auto max-w-6xl px-6 py-12">
+      <p class="text-sm font-medium uppercase tracking-wide text-accent-600">
+        Templates
+      </p>
+      <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">
+        Available agents
+      </h1>
+      <p class="mt-3 max-w-2xl text-ink-500">
+        Each card is a ready-to-install template. Install the parent to get the full
+        team, or drill into a specialty for a focused agent.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <div class="mx-auto max-w-6xl px-6 py-12">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {all.map((a) => (
+          <AgentCard agent={a} href={link(`/agents/${a.slug}`)} />
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
