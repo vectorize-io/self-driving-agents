@@ -1,21 +1,24 @@
 /**
- * Build an internal link with the configured base path.
+ * Build an href for internal navigation through `<Link>`.
  *
- * Next.js `<Link href="/foo">` does NOT prepend basePath when href starts
- * with a slash AND we're using `output: 'export'`. To keep static asset
- * paths and anchor hrefs consistent we apply the base manually.
+ * Next.js's `<Link>` already prepends the configured `basePath` to root-
+ * relative hrefs, so this helper must NOT add it again — otherwise we get
+ * `/<base>/<base>/path`. The function exists only to normalise inputs to a
+ * leading-slash form and to keep call sites uniform.
  */
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
 export function link(path: string): string {
-  if (!path.startsWith('/')) return `${BASE}/${path}`;
-  return `${BASE}${path}`;
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 /**
- * Build an asset URL under /public — used for logos and favicons since
- * `<img src>` does not pick up basePath automatically with `output: 'export'`.
+ * Build a URL for static assets under /public.
+ *
+ * Plain `<img src>`, `<link rel="icon">`, and other raw HTML attributes do
+ * NOT get basePath prepended by Next.js. We have to do it ourselves.
  */
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 export function asset(path: string): string {
-  return link(path.startsWith('/') ? path : `/${path}`);
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return `${BASE}${p}`;
 }
