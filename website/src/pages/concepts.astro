@@ -1,0 +1,353 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+
+const base = import.meta.env.BASE_URL;
+const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
+---
+
+<Layout
+  title="Concepts"
+  description="How self-driving agents work: memory banks, knowledge pages (the agent's wiki), memories, mental models, directives, and dispositions."
+>
+  <!-- Hero -->
+  <section class="border-b border-ink-200 bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <p class="text-sm font-medium uppercase tracking-wide text-accent-600">
+        Concepts
+      </p>
+      <h1 class="mt-2 text-3xl font-bold text-ink-900 sm:text-4xl">
+        How self-driving agents work
+      </h1>
+      <p class="mt-3 max-w-2xl text-lg leading-relaxed text-ink-500">
+        Each agent has a personal wiki it reads at session start, references during
+        the chat, and rewrites afterwards. The wiki — plus the raw facts it's
+        distilled from — lives in <a class="text-accent-600 hover:underline" href="https://github.com/vectorize-io/hindsight" target="_blank" rel="noopener">Hindsight</a>,
+        the memory backend.
+      </p>
+    </div>
+  </section>
+
+  <!-- Mental model -->
+  <section class="border-b border-ink-200 bg-ink-50">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">The mental model</h2>
+      <p class="mt-2 text-ink-600">
+        Two layers, both per-agent:
+      </p>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="rounded-xl border border-ink-200 bg-white p-5">
+          <h3 class="text-lg font-semibold text-ink-900">📒 Knowledge pages</h3>
+          <p class="mt-1 text-sm text-ink-500">The wiki.</p>
+          <p class="mt-3 text-sm leading-relaxed text-ink-700">
+            Persistent, editable markdown documents the agent owns. Synthesized from
+            raw memories. Loaded at session start so the agent walks in already
+            knowing what it knows.
+          </p>
+        </div>
+        <div class="rounded-xl border border-ink-200 bg-white p-5">
+          <h3 class="text-lg font-semibold text-ink-900">🧾 Memories</h3>
+          <p class="mt-1 text-sm text-ink-500">The raw stream.</p>
+          <p class="mt-3 text-sm leading-relaxed text-ink-700">
+            Atomic facts retained during conversations or ingested from documents.
+            Searchable, durable, never deleted. Pages are how they get distilled
+            into something an agent can quickly load and reason over.
+          </p>
+        </div>
+      </div>
+
+      <p class="mt-6 text-sm leading-relaxed text-ink-600">
+        Think of memories as a journal and pages as the wiki entries the agent
+        keeps writing from that journal. Both live in the agent's <em>bank</em> —
+        its private container in Hindsight.
+      </p>
+    </div>
+  </section>
+
+  <!-- The bank -->
+  <section class="border-b border-ink-200 bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">The bank: one per agent</h2>
+      <p class="mt-2 text-ink-600">
+        A bank is the top-level container in Hindsight. Everything below is scoped
+        to it — pages, memories, directives, dispositions. When the install CLI
+        binds an agent to a harness, what it really binds is a <em>bank ID</em>.
+      </p>
+
+      <div class="mt-6 grid gap-3 sm:grid-cols-2">
+        {[
+          { k: 'Reflect mission', v: 'How the agent should synthesize what it learns into pages.' },
+          { k: 'Retain mission', v: 'What kinds of facts the agent should extract from conversations.' },
+          { k: 'Knowledge pages', v: 'The wiki the agent maintains.' },
+          { k: 'Memories', v: 'Raw facts retained over time.' },
+          { k: 'Directives', v: 'High-priority rules surfaced at every session start.' },
+          { k: 'Dispositions', v: 'Personality traits that bias retention and reflection.' },
+        ].map((row) => (
+          <div class="rounded-lg border border-ink-200 bg-ink-50 p-3">
+            <div class="text-xs font-semibold uppercase tracking-wide text-ink-500">
+              {row.k}
+            </div>
+            <p class="mt-1 text-sm text-ink-700">{row.v}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Pages -->
+  <section class="border-b border-ink-200 bg-ink-50">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">Knowledge pages: the wiki</h2>
+      <p class="mt-2 text-ink-600">
+        Each page is a markdown document with a title and a body. The agent
+        treats them like a wiki: read everything at startup, edit during the
+        conversation, let Hindsight refresh them afterwards.
+      </p>
+
+      <p class="mt-6 text-sm font-semibold text-ink-700">REST surface</p>
+      <div class="mt-2 space-y-3">
+        <CodeBlock
+          lang="bash"
+          code={`# List all pages in the bank
+GET    /v1/default/banks/{bank}/knowledge/pages
+
+# Read a page
+GET    /v1/default/banks/{bank}/knowledge/pages/{page_id}
+
+# Create
+POST   /v1/default/banks/{bank}/knowledge/pages
+       { "title": "...", "content": "markdown..." }
+
+# Update
+PUT    /v1/default/banks/{bank}/knowledge/pages/{page_id}
+
+# Delete
+DELETE /v1/default/banks/{bank}/knowledge/pages/{page_id}`}
+        />
+      </div>
+
+      <p class="mt-6 text-sm leading-relaxed text-ink-600">
+        Most harnesses don't talk to this REST surface directly — they go through
+        the Hindsight MCP server (Claude Code) or a plugin (OpenClaw, NemoClaw,
+        Hermes). The Claude Chat skill is the one exception: it calls the API via
+        baked-in <code class="rounded bg-ink-100 px-1 py-0.5">curl</code> snippets.
+      </p>
+    </div>
+  </section>
+
+  <!-- Mental models -->
+  <section class="border-b border-ink-200 bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">Mental models: page recipes</h2>
+      <p class="mt-2 text-ink-600">
+        You don't write the wiki by hand. You declare which pages should exist
+        in <code class="rounded bg-ink-100 px-1 py-0.5">bank-template.json</code> as
+        <em>mental models</em>. Each mental model is a recipe: a name plus a query
+        Hindsight runs against the bank's memories to populate (and later refresh)
+        the page.
+      </p>
+
+      <div class="mt-6">
+        <CodeBlock
+          lang="json"
+          code={`{
+  "mental_models": [
+    {
+      "id": "seo-best-practices",
+      "name": "SEO Best Practices",
+      "max_tokens": 4096,
+      "source_query": "What SEO best practices have we observed working? Combine industry standards with what has actually performed in our data.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}`}
+        />
+      </div>
+
+      <p class="mt-6 text-sm leading-relaxed text-ink-600">
+        The first time the agent installs, the CLI creates one knowledge page
+        per mental model. After that, Hindsight keeps each page in sync — when
+        new memories arrive that match the page's query, the page gets refreshed
+        in the background. The agent never has to babysit it.
+      </p>
+    </div>
+  </section>
+
+  <!-- Directives + dispositions -->
+  <section class="border-b border-ink-200 bg-ink-50">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <div class="grid gap-8 md:grid-cols-2">
+        <div>
+          <h2 class="text-2xl font-semibold text-ink-900">Directives</h2>
+          <p class="mt-2 text-sm leading-relaxed text-ink-600">
+            Optional bank-level rules the agent sees alongside its pages. Each
+            directive has a <code class="rounded bg-ink-100 px-1 py-0.5">name</code>,
+            <code class="rounded bg-ink-100 px-1 py-0.5">content</code>, and
+            <code class="rounded bg-ink-100 px-1 py-0.5">priority</code>. Use them
+            for "always do X before Y" guidance that should colour every
+            decision, not just the ones a page happens to mention.
+          </p>
+          <p class="mt-3 text-sm leading-relaxed text-ink-600">
+            Example from the SEO bank:
+            <em>"Data over dogma — prefer observed performance data over industry
+            best practices."</em>
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-2xl font-semibold text-ink-900">Dispositions</h2>
+          <p class="mt-2 text-sm leading-relaxed text-ink-600">
+            Three personality dials (1–5) that bias how the bank retains and
+            reflects.
+          </p>
+          <ul class="mt-3 space-y-2 text-sm leading-relaxed text-ink-700">
+            <li>
+              <strong>Empathy</strong> — how generously it interprets ambiguous
+              user signals.
+            </li>
+            <li>
+              <strong>Skepticism</strong> — how much it distrusts loose claims
+              before treating them as fact.
+            </li>
+            <li>
+              <strong>Literalism</strong> — how strictly it preserves exact wording
+              vs paraphrasing.
+            </li>
+          </ul>
+          <p class="mt-3 text-sm leading-relaxed text-ink-600">
+            A customer-support bank might run high-empathy, low-skepticism. A
+            research bank might be low-empathy, high-skepticism, high-literalism.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lifecycle -->
+  <section class="border-b border-ink-200 bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">Lifecycle of one conversation</h2>
+      <ol class="mt-6 space-y-5">
+        {[
+          {
+            t: 'Session starts',
+            b: 'The agent lists every knowledge page in its bank and reads them. Directives and dispositions come along for the ride. By the time you type your first message, the agent already knows what it knows.',
+          },
+          {
+            t: 'Conversation runs',
+            b: 'When something noteworthy happens — a decision, a preference, a measurement, a correction — the agent retains it as a memory. In harnesses with auto-retain hooks (OpenClaw, NemoClaw, Hermes) this happens automatically; in Claude Chat/Cowork the skill self-retains via curl.',
+          },
+          {
+            t: 'Session ends → Hindsight consolidates',
+            b: 'New memories get folded into the bank. For each mental model whose trigger fires, Hindsight re-runs its source_query and rewrites the corresponding knowledge page. The page now reflects what was learned.',
+          },
+          {
+            t: 'Next session starts',
+            b: 'Same flow again — but the wiki the agent loads is already different. That\'s "self-driving": no retraining, no manual curation, just chat and let the loop run.',
+          },
+        ].map((step, i) => (
+          <li class="flex gap-4">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-500 text-sm font-semibold text-white"
+            >
+              {i + 1}
+            </span>
+            <div class="flex-1">
+              <h3 class="font-semibold text-ink-900">{step.t}</h3>
+              <p class="mt-1 text-sm leading-relaxed text-ink-600">{step.b}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- What lives where -->
+  <section class="border-b border-ink-200 bg-ink-50">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">What lives where</h2>
+      <p class="mt-2 text-ink-600">
+        A quick map between the things you write, the things the CLI generates,
+        and the things the running agent reads.
+      </p>
+
+      <div class="mt-5 overflow-x-auto rounded-xl border border-ink-200 bg-white">
+        <table class="w-full text-sm">
+          <thead class="bg-ink-100 text-ink-600">
+            <tr>
+              <th class="p-3 text-left font-semibold">You write</th>
+              <th class="p-3 text-left font-semibold">CLI sets up</th>
+              <th class="p-3 text-left font-semibold">Agent reads at runtime</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ink-200">
+            <tr>
+              <td class="p-3"><code class="rounded bg-ink-100 px-1 py-0.5">bank-template.json</code></td>
+              <td class="p-3">A Hindsight bank with that mission, dispositions, and directives</td>
+              <td class="p-3">— (config, not runtime)</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code class="rounded bg-ink-100 px-1 py-0.5">mental_models[]</code></td>
+              <td class="p-3">One knowledge page per model</td>
+              <td class="p-3">All pages, every session start</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code class="rounded bg-ink-100 px-1 py-0.5">.md / .txt</code> seed files</td>
+              <td class="p-3">Ingested as initial memories</td>
+              <td class="p-3">Through the pages they get rolled into</td>
+            </tr>
+            <tr>
+              <td class="p-3"><code class="rounded bg-ink-100 px-1 py-0.5">directives[]</code></td>
+              <td class="p-3">Saved on the bank</td>
+              <td class="p-3">Loaded alongside pages at startup</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Next -->
+  <section class="bg-white">
+    <div class="mx-auto max-w-4xl px-6 py-12">
+      <h2 class="text-2xl font-semibold text-ink-900">From here</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-3">
+        <a
+          href={link('/agents')}
+          class="rounded-xl border border-ink-200 bg-ink-50 p-5 transition hover:border-accent-300 hover:bg-white"
+        >
+          <h3 class="font-semibold text-ink-900">See real banks</h3>
+          <p class="mt-1 text-sm text-ink-500">
+            Browse the marketing templates — each one is a fully populated
+            bank-template.json.
+          </p>
+        </a>
+        <a
+          href={link('/harnesses')}
+          class="rounded-xl border border-ink-200 bg-ink-50 p-5 transition hover:border-accent-300 hover:bg-white"
+        >
+          <h3 class="font-semibold text-ink-900">Pick a harness</h3>
+          <p class="mt-1 text-sm text-ink-500">
+            Each harness exposes the bank to its own runtime — MCP, plugin, or
+            skill.
+          </p>
+        </a>
+        <a
+          href={link('/quickstart')}
+          class="rounded-xl border border-ink-200 bg-ink-50 p-5 transition hover:border-accent-300 hover:bg-white"
+        >
+          <h3 class="font-semibold text-ink-900">Quick start</h3>
+          <p class="mt-1 text-sm text-ink-500">
+            Install one in a single command and watch the loop run.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -74,7 +74,7 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
         </p>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
             n: '1',
@@ -112,6 +112,35 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
           </div>
         ))}
       </div>
+
+      <a
+        href={link('/concepts')}
+        class="group mt-8 flex flex-wrap items-start gap-4 rounded-xl border border-accent-200 bg-accent-50/50 p-5 transition hover:border-accent-300 hover:bg-accent-50"
+      >
+        <span
+          class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500 text-base font-bold text-white"
+          aria-hidden="true"
+        >
+          📒
+        </span>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-semibold text-ink-900 group-hover:text-accent-700">
+            Want the deeper picture?
+          </h3>
+          <p class="mt-1 text-sm leading-relaxed text-ink-600">
+            Each agent has a personal wiki — knowledge pages it loads at startup
+            and rewrites afterwards — backed by raw memories in a Hindsight bank.
+            Read the concepts page for the full mental model: pages, memories,
+            mental models, directives, and dispositions.
+          </p>
+        </div>
+        <span
+          class="self-center text-sm font-semibold text-accent-600 group-hover:underline"
+          aria-hidden="true"
+        >
+          Read concepts →
+        </span>
+      </a>
     </div>
   </section>
 

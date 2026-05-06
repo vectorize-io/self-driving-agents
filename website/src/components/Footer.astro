@@ -17,6 +17,7 @@ const link = (p: string) => `${base.replace(/\/$/, '')}/${p.replace(/^\//, '')}`
       </span>
     </div>
     <div class="flex flex-wrap gap-x-6 gap-y-2">
+      <a href={link('/concepts')} class="hover:text-ink-900">Concepts</a>
       <a href={link('/agents')} class="hover:text-ink-900">Agents</a>
       <a href={link('/harnesses')} class="hover:text-ink-900">Harnesses</a>
       <a
