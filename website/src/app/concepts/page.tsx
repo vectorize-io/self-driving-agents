@@ -10,25 +10,30 @@ export const metadata: Metadata = {
     'The data model behind self-driving agents: memories, knowledge pages, mental models, and the consolidation → refresh loop that keeps pages in sync with conversations.',
 };
 
+// Mermaid v11 edge-label syntax notes:
+//   solid:  A -->|label| B
+//   dotted: A -.->|label| B
+// Avoid the `A --"label"--> B` form — it's accepted in some grammars but
+// blows up in others (especially with hexagon and parallelogram nodes).
 const FLOW = `
 flowchart TD
     A([User ↔ Agent conversation]):::agent
     M[/"Memories<br/>world · experience"/]:::hs
-    O[/"Observation facts<br/>(synthesised)"/]:::hs
+    O[/"Observation facts<br/>synthesised server-side"/]:::hs
     T{{"refresh_after_consolidation<br/>trigger fires?"}}:::hs
-    R["Recall<br/>filter by fact_types, tags<br/>exclude_mental_models"]:::hs
-    G["Generate<br/>source_query → body<br/>capped at max_tokens"]:::hs
+    R["Recall<br/>filter by fact_types and tags<br/>exclude_mental_models"]:::hs
+    G["Generate<br/>source_query to body<br/>capped at max_tokens"]:::hs
     P[("Knowledge page body<br/>updated full or delta")]:::hs
     N([Next session: agent reads pages]):::agent
 
-    A --"retain()"--> M
-    M --"consolidation"--> O
+    A -->|retain| M
+    M -->|consolidation| O
     O --> T
-    T --"yes"--> R
+    T -->|yes| R
     R --> G
     G --> P
     P --> N
-    N -.-"new conversation".-> A
+    N -.->|new conversation| A
 
     classDef agent fill:#d9e6ff,stroke:#3a5ef0,color:#0d0d10,stroke-width:2px
     classDef hs fill:#dcfce7,stroke:#059669,color:#0d0d10,stroke-width:2px

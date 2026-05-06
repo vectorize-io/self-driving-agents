@@ -920,7 +920,7 @@ async function main() {
 
       // Step 2: Ensure marketplace + plugin installed
       const MARKETPLACE_REPO = "vectorize-io/hindsight";
-      const MARKETPLACE_NAME = "vectorize-io-hindsight";
+      const MARKETPLACE_NAME = "hindsight";
       const PLUGIN_NAME = "hindsight-memory";
 
       let hasMarketplace = false;

@@ -37,14 +37,13 @@ jobs:
       - name: Build
         working-directory: website
         env:
-          SITE_URL: https://vectorize-io.github.io
           SITE_BASE: /self-driving-agents
         run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: website/dist
+          path: website/out
 
   deploy:
     needs: build

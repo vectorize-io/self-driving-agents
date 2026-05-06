@@ -647,14 +647,14 @@ describe("claude-code plugin install/update logic", () => {
   });
 
   it("updates when plugin already present", () => {
-    const out = "Installed plugins:\n  ❯ hindsight-memory@vectorize-io-hindsight\n    Version: 0.5.0";
+    const out = "Installed plugins:\n  ❯ hindsight-memory@hindsight\n    Version: 0.5.0";
     expect(shouldInstall(out, "hindsight-memory")).toBe(false);
     expect(shouldUpdate(out, "hindsight-memory")).toBe(true);
   });
 
   it("detects plugin regardless of installed scope", () => {
-    const userScope = "  ❯ hindsight-memory@vectorize-io-hindsight\n    Scope: user";
-    const localScope = "  ❯ hindsight-memory@vectorize-io-hindsight\n    Scope: local";
+    const userScope = "  ❯ hindsight-memory@hindsight\n    Scope: user";
+    const localScope = "  ❯ hindsight-memory@hindsight\n    Scope: local";
     expect(shouldUpdate(userScope, "hindsight-memory")).toBe(true);
     expect(shouldUpdate(localScope, "hindsight-memory")).toBe(true);
   });
@@ -667,11 +667,11 @@ describe("claude-code marketplace detection", () => {
     return out.includes(name) || out.includes(repo);
   }
 
-  const MARKETPLACE_NAME = "vectorize-io-hindsight";
+  const MARKETPLACE_NAME = "hindsight";
   const MARKETPLACE_REPO = "vectorize-io/hindsight";
 
   it("detects when marketplace already added by name", () => {
-    const out = "Configured marketplaces:\n  vectorize-io-hindsight (github: vectorize-io/hindsight)";
+    const out = "Configured marketplaces:\n  hindsight (github: vectorize-io/hindsight)";
     expect(hasMarketplace(out, MARKETPLACE_NAME, MARKETPLACE_REPO)).toBe(true);
   });
 
