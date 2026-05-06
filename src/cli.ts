@@ -685,7 +685,8 @@ curl -s -X POST ${apiUrl}/v1/default/banks/${bankId}/memories/retain \\
 }
 
 async function promptClaudeConfig(
-  agentId: string
+  agentId: string,
+  opts: { askBankId?: boolean } = { askBankId: true }
 ): Promise<{ apiUrl: string; bankId: string; apiToken?: string }> {
   const deploymentType = await p.select({
     message: "Hindsight deployment:",
@@ -729,15 +730,18 @@ async function promptClaudeConfig(
   }
   const apiToken = (tokenInput as string) || undefined;
 
-  const bankInput = await p.text({
-    message: "Bank ID:",
-    initialValue: agentId,
-  });
-  if (p.isCancel(bankInput)) {
-    p.cancel("Cancelled.");
-    process.exit(0);
+  let bankId = agentId;
+  if (opts.askBankId) {
+    const bankInput = await p.text({
+      message: "Bank ID:",
+      initialValue: agentId,
+    });
+    if (p.isCancel(bankInput)) {
+      p.cancel("Cancelled.");
+      process.exit(0);
+    }
+    bankId = (bankInput as string).trim() || agentId;
   }
-  const bankId = (bankInput as string).trim() || agentId;
 
   return { apiUrl, bankId, apiToken };
 }
@@ -982,7 +986,8 @@ async function main() {
 
       const hasConnection = ccConfig.hindsightApiUrl || ccConfig.llmProvider;
       if (!hasConnection && process.stdin.isTTY) {
-        const claudeConfig = await promptClaudeConfig(agentId);
+        // Bank ID is derived from agent + cwd at runtime — don't ask for it
+        const claudeConfig = await promptClaudeConfig(agentId, { askBankId: false });
         ccConfig.hindsightApiUrl = claudeConfig.apiUrl;
         ccConfig.hindsightApiToken = claudeConfig.apiToken;
       }

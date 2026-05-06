@@ -68,6 +68,66 @@ export const HARNESSES: Harness[] = [
     logo: 'logos/claude.svg',
   },
   {
+    slug: 'hermes',
+    name: 'Hermes',
+    tagline:
+      'NousResearch\'s open-source agent runtime. Per-agent profiles with built-in auto-retain and direct page tools.',
+    flag: '--harness hermes',
+    intro:
+      'Hermes runs locally and isolates each agent in its own profile. The CLI creates a Hermes profile for the agent, drops in the hindsight-sda plugin and the agent-knowledge skill, and switches the profile\'s memory provider to Hindsight so retain happens automatically as you chat.',
+    audience:
+      'Use this harness if you run hermes-agent on your own machine and want a self-driving agent with both background auto-retain and explicit knowledge-page tools.',
+    steps: [
+      {
+        title: 'Install hermes-agent',
+        body:
+          'The CLI checks for the hermes binary on PATH and bails if it\'s missing. Install it once from NousResearch\'s install script, then any agent install can target it.',
+        code:
+          'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash',
+      },
+      {
+        title: 'Install the agent',
+        body:
+          'Run the CLI with --harness hermes. It creates (or reuses) a Hermes profile named after the agent, copies the hindsight-sda plugin into the profile, and writes the Hindsight connection into the profile config.',
+        code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness hermes',
+      },
+      {
+        title: 'Chat',
+        body:
+          'Start a session with the agent\'s profile. Memory retains in the background; the agent-knowledge skill is loaded so you can also work with knowledge pages directly.',
+        code: 'hermes -p marketing-seo chat',
+      },
+    ],
+    howItWorks: [
+      'The CLI runs hermes profile create <agent> --clone (or reuses an existing profile) and reads the profile path from hermes profile show.',
+      'It copies the hindsight-sda plugin (plugin.yaml + __init__.py) into <profile>/plugins/hindsight-sda/, and writes <profile>/hindsight/config.json with the API URL, token, and bank ID.',
+      'It edits <profile>/config.yaml to set memory.provider: hindsight and add hindsight-sda to plugins.enabled — so the bundled Hindsight memory provider auto-retains during chat and the tool plugin exposes knowledge-page operations to the agent.',
+      'Seed knowledge from the agent directory is ingested as initial memories, and the agent-knowledge skill is dropped into <profile>/skills/agent-knowledge/SKILL.md.',
+    ],
+    bankMapping: {
+      summary:
+        'Each Hermes profile maps 1:1 to one Hindsight bank. The bank ID equals the agent name (and the profile name). Connection lives in <profile>/hindsight/config.json.',
+      details: [
+        'The CLI writes <profile>/hindsight/config.json with mode, api_url, api_key, bank_id, recall_budget, and memory_mode. Both the bundled Hindsight memory provider and the hindsight-sda tool plugin read this same file — single source of truth.',
+        'bank_id is set to the agent name and bank_id_template is left empty, so every chat in the profile lands in the same Hindsight bank. No dynamic per-thread banks.',
+        'On install the CLI looks for an existing connection in this order: <profile>/../hindsight/config.json, then OpenClaw\'s plugin config, then prompts. Re-running the install with the same agent name reuses the profile and updates the config in place.',
+        'To re-map: edit <profile>/hindsight/config.json (e.g. point at a different bank_id or api_url) — no restart of a daemon needed; hermes reads it at the next chat.',
+      ],
+    },
+    links: [
+      {
+        label: 'hermes-agent on GitHub',
+        href: 'https://github.com/NousResearch/hermes-agent',
+      },
+      {
+        label: 'Hermes docs',
+        href: 'https://hermes-agent.nousresearch.com/',
+      },
+    ],
+    color: '#B8860B',
+    logo: 'logos/hermes.svg',
+  },
+  {
     slug: 'claude',
     name: 'Claude Chat & Cowork',
     tagline:
