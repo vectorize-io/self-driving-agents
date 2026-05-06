@@ -1135,6 +1135,7 @@ async function main() {
       [
         `Agent:     ${color.bold(agentId)}`,
         `Source:    ${color.dim(source)}`,
+        `Bank:      ${color.dim(bankId)}`,
         `API:       ${color.dim(apiUrl)}`,
         `Workspace: ${color.dim(workspaceDir)}`,
       ].join("\n")
