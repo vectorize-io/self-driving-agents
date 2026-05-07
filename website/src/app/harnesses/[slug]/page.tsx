@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CodeBlock } from '@/components/CodeBlock';
 import { HarnessLogo } from '@/components/HarnessLogo';
+import { Inline } from '@/components/Inline';
 import { findHarness, HARNESSES } from '@/lib/harnesses';
 import { link } from '@/lib/link';
 
@@ -57,19 +58,30 @@ export default async function HarnessDetailPage({
         </div>
       </section>
 
+      {/* What you get */}
       <section className="border-b border-ink-200 bg-ink-50">
         <div className="mx-auto max-w-4xl px-6 py-10">
-          <p className="text-base leading-relaxed text-ink-700">{harness.intro}</p>
-          <div className="mt-5 rounded-xl border border-ink-200 bg-white p-4 text-sm text-ink-600">
-            <span className="font-semibold text-ink-900">Who it's for:</span>{' '}
-            {harness.audience}
-          </div>
+          <h2 className="text-xl font-semibold text-ink-900">What you get</h2>
+          <p className="mt-2 max-w-3xl text-base leading-relaxed text-ink-700">
+            <Inline text={harness.whatYouGet.intro} />
+          </p>
+          <ul className="mt-6 space-y-3 text-sm leading-relaxed text-ink-700">
+            {harness.whatYouGet.items.map((line, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                <span>
+                  <Inline text={line} />
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
+      {/* Setup */}
       <section className="border-b border-ink-200 bg-white">
         <div className="mx-auto max-w-4xl px-6 py-10">
-          <h2 className="text-xl font-semibold text-ink-900">How to run it</h2>
+          <h2 className="text-xl font-semibold text-ink-900">Setup</h2>
           <ol className="mt-6 space-y-6">
             {harness.steps.map((s, i) => (
               <li key={i} className="flex gap-4">
@@ -79,7 +91,7 @@ export default async function HarnessDetailPage({
                 <div className="flex-1">
                   <h3 className="font-semibold text-ink-900">{s.title}</h3>
                   <p className="mt-1 text-sm leading-relaxed text-ink-600">
-                    {s.body}
+                    <Inline text={s.body} />
                   </p>
                   {s.code && (
                     <div className="mt-3">
@@ -93,46 +105,69 @@ export default async function HarnessDetailPage({
         </div>
       </section>
 
-      {/* Bank mapping */}
+      {/* How it works */}
       <section className="border-b border-ink-200 bg-ink-50">
         <div className="mx-auto max-w-4xl px-6 py-10">
-          <h2 className="text-xl font-semibold text-ink-900">
-            Mapping into a Hindsight bank
-          </h2>
-          <p className="mt-1 text-sm text-ink-500">
-            Where the agent → bank binding lives, and how to change it.
-          </p>
+          <h2 className="text-xl font-semibold text-ink-900">How it works</h2>
 
+          {harness.howItWorks.length === 1 ? (
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-ink-700">
+              <Inline text={harness.howItWorks[0]} />
+            </p>
+          ) : (
+            <ul className="mt-6 space-y-3 text-sm leading-relaxed text-ink-700">
+              {harness.howItWorks.map((line, i) => (
+                <li key={i} className="flex gap-3">
+                  <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
+                  <span>
+                    <Inline text={line} />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {harness.tools.length > 0 && (
+            <>
+              <h3 className="mt-8 text-sm font-semibold uppercase tracking-wide text-ink-500">
+                Tools the agent gets
+              </h3>
+              <div className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                {harness.tools.map((t) => (
+                  <div key={t.name} className="flex flex-col gap-0.5">
+                    <code className="font-mono text-sm text-ink-900">
+                      {t.name}
+                    </code>
+                    <span className="text-xs leading-snug text-ink-500">
+                      {t.description}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <h3 className="mt-10 text-sm font-semibold uppercase tracking-wide text-ink-500">
+            Bank mapping
+          </h3>
           <aside
-            className="mt-5 rounded-xl bg-accent-50/60 p-5 ring-1 ring-inset ring-accent-200"
+            className="mt-3 rounded-xl bg-white p-5 ring-1 ring-inset ring-accent-200"
             role="note"
           >
             <p className="text-sm font-semibold text-ink-900">
-              {harness.bankMapping.summary}
+              <Inline text={harness.bankMapping.summary} />
             </p>
             <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ink-700">
               {harness.bankMapping.details.map((line, i) => (
                 <li key={i} className="flex gap-2">
                   <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-400" />
-                  <span>{line}</span>
+                  <span>
+                    <Inline text={line} />
+                  </span>
                 </li>
               ))}
             </ul>
           </aside>
-        </div>
-      </section>
-
-      <section className="border-b border-ink-200 bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-10">
-          <h2 className="text-xl font-semibold text-ink-900">Under the hood</h2>
-          <ul className="mt-5 space-y-3 text-sm leading-relaxed text-ink-700">
-            {harness.howItWorks.map((line, i) => (
-              <li key={i} className="flex gap-3">
-                <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       </section>
 

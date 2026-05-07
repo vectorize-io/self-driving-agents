@@ -3,10 +3,30 @@ export interface Harness {
   name: string;
   tagline: string;
   flag: string;
-  intro: string;
-  audience: string;
+
+  /**
+   * "What you get" — user-facing value of adding self-driving-agents to
+   * this harness. Prose intro + bullet list. NO plugin names, file paths,
+   * tool signatures, or other implementation detail here — those live in
+   * `howItWorks` and `tools`.
+   */
+  whatYouGet: { intro: string; items: string[] };
+
   steps: { title: string; body: string; code?: string }[];
+
+  /**
+   * "How it works" prose — typically a single paragraph in the structured
+   * shape. Each entry is rendered through `<Inline>` so backticks become
+   * <code> and `**bold**` becomes <strong>.
+   */
   howItWorks: string[];
+
+  /**
+   * Agent-facing tools rendered as a grid in "How it works". Each entry
+   * is one row: `name` shown as inline code, `description` as short prose.
+   */
+  tools: { name: string; description: string }[];
+
   bankMapping: { summary: string; details: string[] };
   links: { label: string; href: string }[];
   color: string;
@@ -20,59 +40,70 @@ export const HARNESSES: Harness[] = [
     slug: 'claude-code',
     name: 'Claude Code',
     tagline:
-      'Anthropic\'s Claude Code CLI with the Hindsight Memory plugin — auto-recall, auto-retain, and the agent_knowledge_* tools, all wired in.',
+      'Claude Code that learns from every project.',
     flag: '--harness claude-code',
-    intro:
-      'The claude-code harness drops the Hindsight Memory plugin into Claude Code. The plugin\'s hooks auto-recall relevant memories before every user prompt and auto-retain the conversation after every response; its MCP server exposes the agent_knowledge_* tools for managing pages and ingesting content. The self-driving-agents CLI takes care of installing the plugin, configuring the Hindsight connection, staging seed content, and allowlisting the right tools.',
-    audience:
-      'Use this harness if you already use Claude Code in your terminal and want a self-driving agent backed by Hindsight memory — no skill zip, no separate gateway.',
+    whatYouGet: {
+      intro:
+        'Claude Code in a project directory has no memory of prior sessions there — every conversation starts fresh. Self-driving agents make Claude get sharper over time on each project: it picks up the conventions, the patterns that work, and your corrections, and walks into the next session already knowing them.',
+      items: [
+        '**Learns from every conversation** — preferences, decisions, and recurring patterns from each project session feed forward to the next.',
+        '**Builds its own playbooks** — the agent maintains long-form pages (a personal wiki) that self-rewrite from what it has learned in this project.',
+        '**One agent per project directory** — same agent name in two different project dirs keeps its learning separate. Same dir means same memory.',
+      ],
+    },
     steps: [
+      {
+        title: 'Have Claude Code installed',
+        body:
+          'The CLI shells out to `claude plugin install` and writes to `~/.claude/settings.json`. Install Claude Code first if you haven\'t already.',
+        code: 'npm install -g @anthropic-ai/claude-code',
+      },
       {
         title: 'Install the agent',
         body:
-          'Verifies `claude` is on PATH; adds the `vectorize-io/hindsight` plugin marketplace and installs (or updates) the `hindsight-memory` plugin; prompts for your Hindsight connection if you don\'t already have one configured; writes plugin config to `~/.hindsight/claude-code.json`; stages content under `~/.self-driving-agents/claude-code/<agent>/`; allowlists the plugin tools and the create-agent skill in `~/.claude/settings.json`.',
+          'One CLI call adds the marketplace, installs (or updates) the plugin, configures the connection (interactive on first run), stages seed content, and allowlists the right tools and skill.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness claude-code',
       },
       {
-        title: 'cd into the project directory the agent should be scoped to',
+        title: 'cd into the project directory',
         body:
-          'The bank is derived from `(agent_name, project_basename)` — the working directory at session start is part of the binding. Always start `claude` from the same project directory if you want this agent to keep the same memory across sessions.',
+          'The agent\'s memory is scoped to the project directory — same agent in a different `cd` means a different bank. Always start `claude` from the same project dir.',
       },
       {
-        title: 'Start Claude Code',
+        title: 'Start Claude Code and run the printed prompt',
         body:
-          'Run `claude` in that directory. The plugin\'s session-start hook health-checks Hindsight, so if the connection is wrong you\'ll see it immediately.',
-        code: 'claude',
-      },
-      {
-        title: 'Run the printed prompt',
-        body:
-          'The CLI printed a one-liner at the end of install. Pasting it triggers the create-agent skill, which writes a Claude Code subagent at `~/.claude/agents/<name>.md` wired up to the Hindsight MCP, ingests every staged file via `agent_knowledge_ingest_file`, and creates three initial knowledge pages.',
+          'The CLI printed a one-liner. Pasting it scaffolds a Claude Code subagent, ingests every staged file, and creates initial knowledge pages.',
         code: '/hindsight-memory:create-agent marketing-seo from ~/.self-driving-agents/claude-code/marketing-seo',
       },
     ],
     howItWorks: [
-      'The Hindsight Memory plugin is installed via Claude Code\'s plugin marketplace (`vectorize-io/hindsight` → `hindsight-memory`). It bundles four hooks, an MCP server, and the create-agent skill.',
-      'Hooks: `SessionStart` runs a health check; `UserPromptSubmit` auto-recalls relevant memories and injects them as invisible `additionalContext`; `Stop` auto-retains the transcript with chunked retention (default: every 10 turns with 2-turn overlap); `SessionEnd` cleans up the auto-managed daemon if one was started.',
-      'MCP server (stdio): exposes `agent_knowledge_list_pages`, `get_page`, `create_page`, `update_page`, `delete_page`, `recall`, `ingest`, `ingest_file`, and `get_current_bank`. The bank ID is auto-resolved at runtime — tools never take a `bank_id` parameter.',
-      'Connection lives in `~/.hindsight/claude-code.json`. Three modes are supported: external Hindsight server (set `hindsightApiUrl` + `hindsightApiToken`), auto-managed local daemon (leave URL empty; the plugin starts `hindsight-embed` via `uvx` and uses an LLM key like `OPENAI_API_KEY` for fact extraction), or an existing local daemon.',
-      'Tool/skill allowlist in `~/.claude/settings.json` under `permissions.allow`: `mcp__plugin_hindsight-memory_hindsight__*`, `Skill(hindsight-memory:create-agent)`, `Bash(ls ~/.self-driving-agents/*)`, `Bash(cat ~/.self-driving-agents/*)` — so the next steps run without approval prompts.',
+      'The integration is the `hindsight-memory` plugin, installed from the `vectorize-io/hindsight` marketplace into Claude Code. It registers four hooks: `SessionStart` runs a health check; `UserPromptSubmit` does **pre-turn** recall and injects an invisible `<hindsight_memories>` block as `additionalContext`; `Stop` does **post-turn** retain (chunked, default every 10 turns with 2-turn overlap); `SessionEnd` cleans up. Connection lives in `~/.hindsight/claude-code.json` (external Hindsight, auto-managed local `hindsight-embed` daemon, or existing daemon). Tool and skill allowlist is in `~/.claude/settings.json` under `permissions.allow`. The plugin also exposes the tools below.',
+    ],
+    tools: [
+      { name: 'list_pages', description: 'List page ids and names.' },
+      { name: 'get_page', description: 'Read the content of a page.' },
+      { name: 'create_page', description: 'Declare a new page recipe.' },
+      { name: 'update_page', description: 'Change a page\'s name or source query.' },
+      { name: 'delete_page', description: 'Remove a page.' },
+      { name: 'recall', description: 'Search retained memories.' },
+      { name: 'ingest', description: 'Add new text content as a memory.' },
+      { name: 'ingest_file', description: 'Read a local file and ingest it.' },
+      { name: 'get_current_bank', description: 'Get the active bank id.' },
     ],
     bankMapping: {
       summary:
-        'Per-(agent, project) bank derivation. Same agent in two different project directories means two different banks. Plugin config and connection live in `~/.hindsight/claude-code.json`.',
+        'Bank id is derived per `(agent, project)`. Same agent in two project directories means two different banks. Plugin config and connection live in `~/.hindsight/claude-code.json`.',
       details: [
-        'The CLI sets `dynamicBankId: true` and `dynamicBankGranularity: ["agent", "project"]` in `~/.hindsight/claude-code.json`. The plugin combines the agent name and the project basename (cwd) into the bank ID at runtime.',
+        'The CLI sets `dynamicBankId: true` and `dynamicBankGranularity: ["agent", "project"]` in `~/.hindsight/claude-code.json`. The plugin combines the agent name and the project basename (cwd) into the bank id at runtime.',
         'It also sets `enableKnowledgeTools: true` so the MCP server exposes the `agent_knowledge_*` tools.',
-        'Connection: `hindsightApiUrl` + `hindsightApiToken` in the same file (external Hindsight server). Leave the URL empty to run a local `hindsight-embed` daemon — that mode needs an LLM key (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) for fact extraction.',
-        'To re-map: change the agent name or the project directory (creates a new bank), or edit `~/.hindsight/claude-code.json` directly. The CLI deliberately bails if it sees `dynamicBankId: false` plus a static `bankId` — that conflicts with self-driving-agents\' per-(agent, project) isolation.',
-        'Auto-recall and auto-retain default to memory types `["world", "experience"]`. Observations are not pulled by default — they\'re the synthesised layer the refresh engine writes against.',
+        'Connection: `hindsightApiUrl` + `hindsightApiToken` in the same file (external Hindsight). Leave the URL empty to run a local `hindsight-embed` daemon — that mode needs an LLM key (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) for fact extraction.',
+        'To re-map: change the agent name or the project directory (creates a new bank), or edit `~/.hindsight/claude-code.json` directly. The CLI bails if it sees `dynamicBankId: false` plus a static `bankId` — that conflicts with the per-`(agent, project)` isolation.',
       ],
     },
     links: [
       { label: 'Claude Code', href: 'https://docs.anthropic.com/en/docs/claude-code' },
       {
-        label: 'Hindsight Memory plugin',
+        label: 'hindsight-memory plugin',
         href: 'https://github.com/vectorize-io/hindsight/tree/main/integrations/claude-code',
       },
       { label: 'Hindsight', href: 'https://github.com/vectorize-io/hindsight' },
@@ -84,47 +115,57 @@ export const HARNESSES: Harness[] = [
     slug: 'hermes',
     name: 'Hermes',
     tagline:
-      'NousResearch\'s open-source agent runtime. Per-agent profiles with built-in auto-retain and direct page tools.',
+      'Hermes profiles that learn from every conversation.',
     flag: '--harness hermes',
-    intro:
-      'Hermes runs locally and isolates each agent in its own profile. The CLI creates a Hermes profile for the agent, drops in the hindsight-sda plugin and the agent-knowledge skill, and switches the profile\'s memory provider to Hindsight so retain happens automatically as you chat.',
-    audience:
-      'Use this harness if you run hermes-agent on your own machine and want a self-driving agent with both background auto-retain and explicit knowledge-page tools.',
+    whatYouGet: {
+      intro:
+        'Hermes runs each agent in its own profile — a clean slate every time. With self-driving agents installed, the profile builds up across sessions: the agent learns from every chat, maintains its own knowledge pages, and walks into the next session already informed.',
+      items: [
+        '**Learns from every conversation** — preferences, decisions, and recurring patterns are captured automatically. The agent walks into the next session already knowing them.',
+        '**Builds its own playbooks** — the agent maintains long-form pages (a personal wiki) that self-rewrite from what it has learned.',
+        '**One profile, one agent, one bank** — clean isolation. Multiple agents on one machine never share memory.',
+      ],
+    },
     steps: [
       {
-        title: 'Install hermes-agent',
+        title: 'Have hermes on PATH',
         body:
-          'The CLI checks for the hermes binary on PATH and bails if it\'s missing. Install it once from NousResearch\'s install script, then any agent install can target it.',
+          'The CLI shells out to `hermes profile create`, `profile show`, and reads the profile config. Install hermes-agent first if you haven\'t already.',
         code:
           'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash',
       },
       {
         title: 'Install the agent',
         body:
-          'Run the CLI with --harness hermes. It creates (or reuses) a Hermes profile named after the agent, copies the hindsight-sda plugin into the profile, and writes the Hindsight connection into the profile config.',
+          'One CLI call creates the Hermes profile, drops in the plugin, configures the connection, ingests seed content, and installs the agent-knowledge skill.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness hermes',
       },
       {
         title: 'Chat',
-        body:
-          'Start a session with the agent\'s profile. Memory retains in the background; the agent-knowledge skill is loaded so you can also work with knowledge pages directly.',
+        body: 'Memory retains in the background as you talk.',
         code: 'hermes -p marketing-seo chat',
       },
     ],
     howItWorks: [
-      'The CLI runs hermes profile create <agent> --clone (or reuses an existing profile) and reads the profile path from hermes profile show.',
-      'It copies the hindsight-sda plugin (plugin.yaml + __init__.py) into <profile>/plugins/hindsight-sda/, and writes <profile>/hindsight/config.json with the API URL, token, and bank ID.',
-      'It edits <profile>/config.yaml to set memory.provider: hindsight and add hindsight-sda to plugins.enabled — so the bundled Hindsight memory provider auto-retains during chat and the tool plugin exposes knowledge-page operations to the agent.',
-      'Seed knowledge from the agent directory is ingested as initial memories, and the agent-knowledge skill is dropped into <profile>/skills/agent-knowledge/SKILL.md.',
+      'The CLI runs `hermes profile create <agent> --clone` (or reuses the existing profile), copies the `hindsight-sda` plugin into `<profile>/plugins/hindsight-sda/`, writes `<profile>/hindsight/config.json` (api url, token, bank id), and edits `<profile>/config.yaml` to set `memory.provider: hindsight` and add `hindsight-sda` to `plugins.enabled`. The bundled Hindsight memory provider then auto-retains during chat. The agent-knowledge skill is dropped into `<profile>/skills/agent-knowledge/SKILL.md` and exposes the tools below.',
+    ],
+    tools: [
+      { name: 'list_pages', description: 'List page ids and names.' },
+      { name: 'get_page', description: 'Read the content of a page.' },
+      { name: 'create_page', description: 'Declare a new page recipe.' },
+      { name: 'update_page', description: 'Change a page\'s name or source query.' },
+      { name: 'delete_page', description: 'Remove a page.' },
+      { name: 'recall', description: 'Search retained memories.' },
+      { name: 'ingest', description: 'Add new text content as a memory.' },
     ],
     bankMapping: {
       summary:
-        'Each Hermes profile maps 1:1 to one Hindsight bank. The bank ID equals the agent name (and the profile name). Connection lives in <profile>/hindsight/config.json.',
+        'Each Hermes profile maps 1:1 to one bank. Bank id equals the agent name (and the profile name). Connection lives in `<profile>/hindsight/config.json`.',
       details: [
-        'The CLI writes <profile>/hindsight/config.json with mode, api_url, api_key, bank_id, recall_budget, and memory_mode. Both the bundled Hindsight memory provider and the hindsight-sda tool plugin read this same file — single source of truth.',
-        'bank_id is set to the agent name and bank_id_template is left empty, so every chat in the profile lands in the same Hindsight bank. No dynamic per-thread banks.',
-        'On install the CLI looks for an existing connection in this order: <profile>/../hindsight/config.json, then OpenClaw\'s plugin config, then prompts. Re-running the install with the same agent name reuses the profile and updates the config in place.',
-        'To re-map: edit <profile>/hindsight/config.json (e.g. point at a different bank_id or api_url) — no restart of a daemon needed; hermes reads it at the next chat.',
+        'The CLI writes `<profile>/hindsight/config.json` with `mode`, `api_url`, `api_key`, `bank_id`, `recall_budget`, and `memory_mode`. Both the bundled memory provider and the `hindsight-sda` tool plugin read this same file — single source of truth.',
+        '`bank_id` is set to the agent name and `bank_id_template` is left empty, so every chat in the profile lands in the same bank.',
+        'On install the CLI looks for an existing connection in this order: `<profile>/../hindsight/config.json`, then OpenClaw\'s plugin config, then prompts. Re-running install with the same agent name reuses the profile and updates the config in place.',
+        'To re-map: edit `<profile>/hindsight/config.json` directly. No daemon restart needed — `hermes` reads it at the next chat.',
       ],
     },
     links: [
@@ -144,44 +185,59 @@ export const HARNESSES: Harness[] = [
     slug: 'claude',
     name: 'Claude Chat & Cowork',
     tagline:
-      'Drop a self-contained skill into claude.ai or Cowork. No backend required.',
+      'Claude.ai agents that learn from every conversation.',
     flag: '--harness claude',
-    intro:
-      'The Claude harness packages an agent as a Claude skill: a zip you upload through the UI. Once uploaded, type /<agent-name> in any conversation to activate it.',
-    audience:
-      'Use this harness if you work in claude.ai (Pro/Team/Enterprise) or Claude Cowork and want self-driving agents that learn from every conversation.',
+    whatYouGet: {
+      intro:
+        'A claude.ai conversation today is a clean slate every time — nothing carries over. With self-driving agents installed, the agent gets sharper with use: it learns from each chat, builds its own knowledge pages, and walks into the next conversation already informed.',
+      items: [
+        '**Learns from every conversation** — preferences, decisions, and key information from each chat are saved and surface in the next one.',
+        '**Builds its own playbooks** — the agent maintains long-form pages (a personal wiki) that self-rewrite from what it has learned.',
+        '**Activate any agent on demand** — type `/<agent-name>` in any chat to load it. Multiple agents in the same Claude account stay isolated.',
+      ],
+    },
     steps: [
       {
-        title: 'Install an agent',
-        body: 'Run the CLI and answer the prompts (Hindsight Cloud or self-hosted, API URL, token).',
+        title: 'Install the agent',
+        body:
+          'One CLI call creates the bank in Hindsight, ingests seed content, and generates a self-contained skill zip with your connection baked in.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness claude',
       },
       {
         title: 'Upload the skill zip',
-        body: 'The CLI generates a self-contained skill zip. In Claude.ai, go to Customize → Skills → Upload and select the file.',
+        body:
+          'In claude.ai → Customize → Skills → Upload, select the zip the CLI just generated.',
       },
       {
-        title: 'Allowlist the API host',
-        body: 'In Settings → Capabilities, allow the Hindsight API host (e.g. api.hindsight.vectorize.io). Skills use curl to talk to Hindsight.',
+        title: 'Allowlist the Hindsight host',
+        body:
+          'Settings → Capabilities → add the Hindsight host (e.g. `api.hindsight.vectorize.io`). The skill calls Hindsight via `curl`.',
       },
       {
-        title: 'Activate the agent',
-        body: 'Start a new conversation and type the agent slash command (e.g. /seo-specialist) to load it.',
+        title: 'Activate in any chat',
+        body: 'Start a new conversation and type the agent slash command.',
+        code: '/marketing-seo',
       },
     ],
     howItWorks: [
-      'The CLI fetches the agent directory and reads bank-template.json.',
-      'It connects to Hindsight, creates a memory bank, and ingests the bundled .md files as seed knowledge.',
-      'A skill zip is generated with the bank ID and API token baked in — no external dependencies.',
-      'When you invoke the skill, Claude loads the latest knowledge pages, retains feedback during the conversation, and updates pages after the session.',
+      'Unlike the other harnesses, claude.ai has no plugin or hook surface — the integration is a Claude **Skill**: a zip with a `SKILL.md` whose Hindsight API URL, bank id, and token are baked in at install time. When you activate it, Claude reads the skill\'s startup sequence and loads every knowledge page in the bank. There are no auto-hooks, so the skill instructs the agent to **self-retain** important content during the conversation by `curl`-ing the retain endpoint. Self-hosted Hindsight must be publicly reachable from Claude\'s servers — localhost URLs are rejected at install time. The skill exposes the tools below.',
+    ],
+    tools: [
+      { name: 'list_pages', description: 'List page ids and names.' },
+      { name: 'get_page', description: 'Read a page.' },
+      { name: 'create_page', description: 'Write a new page (title + content).' },
+      { name: 'update_page', description: 'Overwrite a page (title + content).' },
+      { name: 'delete_page', description: 'Remove a page.' },
+      { name: 'recall', description: 'Search retained memories.' },
+      { name: 'retain', description: 'Self-retain conversation content (no auto-hooks in claude.ai).' },
     ],
     bankMapping: {
       summary:
-        'The Hindsight API URL, API token, and bank ID are baked into the generated skill zip at install time. The CLI prompts for all three.',
+        'API URL, API token, and bank id are baked into the skill zip at install time. The CLI prompts for all three; the bank id defaults to the agent name. Re-binding means regenerating and re-uploading the zip.',
       details: [
-        'During install you pick Cloud (api.hindsight.vectorize.io) or self-hosted, paste an API token, and choose a Bank ID — defaulted to the agent name (e.g. marketing-seo).',
-        'Those values are written into the skill\'s SKILL.md and called via curl from the skill at runtime. There is no in-Claude config — re-binding requires regenerating and re-uploading the zip.',
-        'To re-map the agent to a different bank: re-run the CLI with --harness claude, enter the new bank ID, and upload the regenerated zip via Customize → Skills.',
+        'During install you pick Cloud (`api.hindsight.vectorize.io`) or self-hosted, paste an API token, and choose a bank id — defaulted to the agent name.',
+        'Those values are written into the skill\'s `SKILL.md` and called via `curl` from inside Claude at runtime. There is no in-Claude config to edit.',
+        'To re-map: re-run `npx @vectorize-io/self-driving-agents install … --harness claude` with a new bank id, then re-upload the regenerated zip via Customize → Skills.',
         'Self-hosted Hindsight must be publicly reachable from Claude\'s servers — localhost URLs are rejected at install time.',
       ],
     },
@@ -196,48 +252,72 @@ export const HARNESSES: Harness[] = [
     slug: 'openclaw',
     name: 'OpenClaw',
     tagline:
-      'Open-source agent gateway. The CLI installs the Hindsight plugin and registers a workspace.',
+      'OpenClaw agents that learn from every conversation.',
     flag: '--harness openclaw',
-    intro:
-      'OpenClaw is an open-source agent runtime. The CLI installs the Hindsight plugin into your gateway, creates a workspace from the agent template, and registers the agent so it shows up immediately.',
-    audience:
-      'Use this harness if you self-host an agent gateway and want full control over routing, tools, and policy.',
+    whatYouGet: {
+      intro:
+        'OpenClaw out of the box runs your agent statically — every conversation starts fresh. Self-driving agents make the agent get better with use: it picks up your preferences, the patterns that work, the corrections you make, and walks into the next session already informed.',
+      items: [
+        '**Learns from every conversation** — preferences, decisions, and recurring patterns are captured automatically. The agent walks into the next session already knowing them.',
+        '**Builds its own playbooks** — the agent maintains long-form pages (a personal wiki) that self-rewrite from what it has learned. Read them yourself, or let the agent read from them.',
+        '**Each agent stays separate** — every agent in the gateway gets its own isolated learning, so multiple agents on one OpenClaw instance don\'t mix memories.',
+      ],
+    },
     steps: [
       {
+        title: 'Have OpenClaw on PATH',
+        body:
+          'The CLI shells out to OpenClaw\'s own `plugins install` and `agents add` commands.',
+      },
+      {
         title: 'Install the agent',
-        body: 'Run the CLI and pick OpenClaw as the harness. Provide your gateway URL and admin token when prompted.',
+        body:
+          'One CLI call sets up the plugin, configures the connection, ingests seed content, and registers the agent.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness openclaw',
       },
       {
         title: 'Restart the gateway',
-        body: 'OpenClaw needs a restart to pick up the new plugin and workspace.',
+        body: 'OpenClaw caches plugin and agent state at startup.',
+        code: 'openclaw gateway restart',
       },
       {
-        title: 'Start chatting',
-        body: 'The agent appears in your OpenClaw UI under the workspace name. Open it and start a conversation — memory is updated automatically after each session.',
+        title: 'Open a session',
+        body: 'Memory works automatically from here on.',
+        code: 'openclaw tui --session agent:marketing-seo:main:session1',
       },
     ],
     howItWorks: [
-      'The CLI installs @vectorize-io/hindsight-openclaw-plugin into your OpenClaw gateway.',
-      'It creates an OpenClaw workspace mapped to the Hindsight bank for this agent.',
-      'Knowledge pages from bank-template.json are exposed to the agent as tools — load_knowledge, retain_message, manage_pages.',
-      'The seed .md files are ingested as initial facts so the agent ships with prior knowledge instead of starting blank.',
+      'The integration is the `@vectorize-io/hindsight-openclaw` plugin (≥ 0.7.2), installed at `~/.openclaw/extensions/hindsight-openclaw/`. It registers two hooks: a **pre-turn** recall step pulls relevant memories and injects them as an invisible `<hindsight_memories>` system block, and a **post-turn** retain step saves the conversation. The plugin also exposes the tools below so the agent can manage its own pages.',
+    ],
+    tools: [
+      { name: 'list_pages', description: 'List page ids and names.' },
+      { name: 'get_page', description: 'Read the content of a page.' },
+      { name: 'create_page', description: 'Declare a new page recipe.' },
+      { name: 'update_page', description: 'Change a page\'s name or source query.' },
+      { name: 'delete_page', description: 'Remove a page.' },
+      { name: 'recall', description: 'Search retained memories.' },
+      { name: 'ingest', description: 'Add new text content as a memory.' },
     ],
     bankMapping: {
       summary:
-        'The hindsight-openclaw plugin holds the Hindsight connection. By default each OpenClaw workspace maps 1:1 to a Hindsight bank named after the workspace.',
+        'Each agent gets its own bank, named after the agent. The CLI sets `dynamicBankGranularity: ["agent"]` so SDA agents (which run without channel or sender context) don\'t end up with banks like `<agent>::unknown::anonymous`.',
       details: [
-        'Connection lives under plugins.entries["hindsight-openclaw"].config in your OpenClaw config — fields hindsightApiUrl, hindsightApiToken, and bank-resolution settings.',
-        'In dynamic mode (default), bank ID = workspace name, optionally with bankIdPrefix. Set dynamicBankId: false plus bankId: <fixed> to share one bank across multiple workspaces.',
-        'The first --harness openclaw install runs the plugin\'s setup wizard; subsequent installs reuse the same connection and just add a new workspace.',
-        'To re-map: edit the plugin config and restart the gateway, or re-run the wizard via npx --yes --package @vectorize-io/hindsight-openclaw hindsight-openclaw-setup.',
+        'Connection lives in `~/.openclaw/openclaw.json` under `plugins.entries["hindsight-openclaw"].config` — external Hindsight (`hindsightApiUrl` + `hindsightApiToken`) or embedded daemon. Sensitive fields can be SecretRefs.',
+        'Bank id derivation: `dynamicBankId: true` + `dynamicBankGranularity: ["agent"]` → bank id is the agent name (or `<bankIdPrefix>-<agent>` if you set a prefix).',
+        'On a fresh install the CLI sets the granularity silently. On an existing config with a different granularity, it asks before overriding.',
+        'To share one bank across all agents instead, set `dynamicBankId: false` and a fixed `bankId` — the CLI leaves that combination alone.',
+        'Switch connection by re-running `npx --yes --package @vectorize-io/hindsight-openclaw hindsight-openclaw-setup`.',
       ],
     },
     links: [
       { label: 'OpenClaw', href: 'https://github.com/openclaw/openclaw' },
       {
-        label: 'Hindsight plugin',
-        href: 'https://www.npmjs.com/package/@vectorize-io/hindsight-openclaw-plugin',
+        label: 'hindsight-openclaw plugin',
+        href: 'https://www.npmjs.com/package/@vectorize-io/hindsight-openclaw',
+      },
+      {
+        label: 'Hindsight integrations/openclaw',
+        href: 'https://github.com/vectorize-io/hindsight/tree/main/integrations/openclaw',
       },
     ],
     color: '#E26B3A',
@@ -248,45 +328,73 @@ export const HARNESSES: Harness[] = [
     slug: 'nemoclaw',
     name: 'NemoClaw',
     tagline:
-      'NVIDIA NeMo Agent runtime — same install flow, same self-driving behavior.',
+      'NVIDIA NeMo Agent sandboxes that learn from every conversation.',
     flag: '--harness nemoclaw',
-    intro:
-      'NemoClaw runs on NVIDIA NeMo Agent. The CLI takes care of plugin install, workspace creation, and agent registration so you can focus on the conversation.',
-    audience:
-      'Use this harness if you run on the NeMo Agent stack and want portable memory across NeMo deployments.',
+    whatYouGet: {
+      intro:
+        'NemoClaw runs an OpenClaw gateway inside an NVIDIA NeMo Agent sandbox. Without self-driving agents, every conversation in the sandbox starts fresh. With them installed, the agent learns from each chat — preferences, decisions, recurring patterns — and walks into the next session already informed.',
+      items: [
+        '**Learns from every conversation** — preferences, decisions, and recurring patterns are captured automatically. The agent walks into the next session already knowing them.',
+        '**Builds its own playbooks** — the agent maintains long-form pages (a personal wiki) that self-rewrite from what it has learned.',
+        '**Sandboxed by NeMo\'s policy engine** — the CLI patches just the network rules the plugin needs to reach Hindsight; everything else stays locked under Landlock.',
+      ],
+    },
     steps: [
       {
+        title: 'Have NemoClaw on PATH',
+        body:
+          'The CLI shells out to `nemoclaw list`, `nemoclaw <sandbox> status`, and `nemoclaw <sandbox> skill install`. Create a sandbox first via `nemoclaw onboard` if you don\'t have one.',
+      },
+      {
         title: 'Install the agent',
-        body: 'Run the CLI and pick NemoClaw as the harness. Provide your gateway URL and token when prompted.',
+        body:
+          'One CLI call sets up the openclaw plugin on the host, patches the sandbox network policy, configures the connection (interactive on first run), ingests seed content, and installs the agent-knowledge skill into the sandbox.',
         code: 'npx @vectorize-io/self-driving-agents install marketing/seo --harness nemoclaw',
       },
       {
-        title: 'Restart the gateway',
-        body: 'NemoClaw needs a restart to pick up the new plugin and workspace.',
+        title: 'Connect to the sandbox',
+        body: 'Brings up the sandbox\'s gateway.',
+        code: 'nemoclaw <sandbox> connect',
       },
       {
-        title: 'Start chatting',
-        body: 'The agent shows up in NemoClaw under the workspace name. Conversations are retained into memory automatically.',
+        title: 'Open a session',
+        body: 'Memory works automatically from here on.',
+        code: 'openclaw tui --session agent:main:main:session1',
       },
     ],
     howItWorks: [
-      'The CLI installs the Hindsight NemoClaw plugin into your gateway.',
-      'A NeMo workspace is created and bound to the Hindsight bank.',
-      'Seed knowledge from the agent directory is ingested before the first conversation.',
-      'Knowledge pages are kept up to date by Hindsight as the agent runs.',
+      'NemoClaw runs OpenClaw inside an NVIDIA NeMo Agent sandbox with read-only config and Landlock filesystem isolation. The integration is the same `@vectorize-io/hindsight-openclaw` plugin (≥ 0.7.2) the OpenClaw harness uses, but configured through `hindsight-nemoclaw setup` so the sandbox\'s network policy gets patched in the right place. Two hooks fire on every turn: a **pre-turn** recall step injects an invisible `<hindsight_memories>` system block, and a **post-turn** retain step saves the conversation. The plugin also exposes the tools below.',
+    ],
+    tools: [
+      { name: 'list_pages', description: 'List page ids and names.' },
+      { name: 'get_page', description: 'Read the content of a page.' },
+      { name: 'create_page', description: 'Declare a new page recipe.' },
+      { name: 'update_page', description: 'Change a page\'s name or source query.' },
+      { name: 'delete_page', description: 'Remove a page.' },
+      { name: 'recall', description: 'Search retained memories.' },
+      { name: 'ingest', description: 'Add new text content as a memory.' },
     ],
     bankMapping: {
       summary:
-        'The hindsight-nemoclaw plugin holds the Hindsight connection per sandbox. Bank IDs are namespaced with a configurable prefix (default: "nemoclaw").',
+        'Each agent gets its own bank, prefixed with `nemoclaw-` by default. The CLI sets `dynamicBankGranularity: ["agent"]` so SDA agents in NeMo sandboxes don\'t end up with banks like `<agent>::unknown::anonymous`.',
       details: [
-        'The setup wizard (npx --yes --package @vectorize-io/hindsight-nemoclaw hindsight-nemoclaw setup --sandbox <name>) writes hindsightApiUrl and hindsightApiToken into the sandbox\'s plugin config. Run it once per sandbox.',
-        'Bank ID resolves as <bankIdPrefix>-<workspace>; the default prefix is "nemoclaw" so a workspace called marketing-seo lands in bank nemoclaw-marketing-seo. Override bankIdPrefix in plugin config to group sandboxes.',
-        'Subsequent installs into the same sandbox reuse the existing connection without re-prompting.',
-        'To re-map: edit plugin config (or re-run the setup wizard) and restart the NemoClaw gateway.',
+        'Connection lives in the host\'s `~/.openclaw/openclaw.json` under `plugins.entries["hindsight-openclaw"].config` — NemoClaw shares the host\'s plugin config. External Hindsight (`hindsightApiUrl` + `hindsightApiToken`) or embedded daemon. Sensitive fields can be SecretRefs.',
+        'Bank id derivation: `dynamicBankId: true` + `dynamicBankGranularity: ["agent"]` + `bankIdPrefix: "nemoclaw"` → bank id is `nemoclaw-<agent>`.',
+        'On a fresh install the CLI runs `hindsight-nemoclaw setup --sandbox <name>` interactively. On subsequent installs it re-runs the setup non-interactively so the sandbox\'s network policy stays in place.',
+        'To share one bank across agents instead, set `dynamicBankId: false` and a fixed `bankId` in the host config — the CLI leaves that combination alone.',
+        'To re-map: re-run `npx --yes --package @vectorize-io/hindsight-nemoclaw hindsight-nemoclaw setup --sandbox <name>`.',
       ],
     },
     links: [
       { label: 'NVIDIA NeMo Agent', href: 'https://github.com/NVIDIA/NeMo-Agent' },
+      {
+        label: 'hindsight-nemoclaw',
+        href: 'https://www.npmjs.com/package/@vectorize-io/hindsight-nemoclaw',
+      },
+      {
+        label: 'hindsight-openclaw plugin',
+        href: 'https://www.npmjs.com/package/@vectorize-io/hindsight-openclaw',
+      },
     ],
     color: '#76B900',
     logo: 'logos/nvidia.svg',
