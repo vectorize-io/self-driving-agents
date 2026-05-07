@@ -185,7 +185,11 @@ async function ensureOpenClawAgentGranularity(): Promise<void> {
   p.log.success("Set dynamicBankGranularity = [\"agent\"] for per-agent bank isolation");
 }
 
-const MIN_PLUGIN_VERSION = "0.7.2";
+// Floor for the openclaw hindsight-openclaw plugin. 0.7.4 is the first version
+// that actually wires `enableKnowledgeTools` through getPluginConfig — older
+// versions silently drop the flag and never register the agent_knowledge_*
+// tools. Bumping the floor forces a reinstall for anyone below.
+const MIN_PLUGIN_VERSION = "0.7.4";
 
 function getInstalledPluginVersion(): string | null {
   try {
@@ -306,7 +310,23 @@ async function ensurePlugin(): Promise<void> {
       process.exit(1);
     }
   } else if (currentVersion) {
-    p.log.info(`Hindsight plugin v${currentVersion}`);
+    // Plugin meets the floor — still try to pull the latest minor/patch in case
+    // a newer release shipped fixes (mirrors the claude-code flow which always
+    // runs `claude plugin update`). Best-effort: if openclaw is already on the
+    // latest, this is a no-op; if it fails, we keep the current install.
+    p.log.info(`Hindsight plugin v${currentVersion} — checking for updates...`);
+    try {
+      execSync("openclaw plugins update hindsight-openclaw", { stdio: "pipe" });
+      const updated = getInstalledPluginVersion();
+      if (updated && updated !== currentVersion) {
+        p.log.success(`Hindsight plugin updated v${currentVersion} → v${updated}`);
+      } else {
+        p.log.info(`Hindsight plugin v${currentVersion} (already latest)`);
+      }
+    } catch (err: any) {
+      const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
+      p.log.warn(`Plugin update failed (keeping v${currentVersion}): ${msg.split("\n")[0]}`);
+    }
   }
 
   if (!isPluginConfigured()) {

@@ -347,6 +347,47 @@ describe("versionGte", () => {
   });
 });
 
+describe("openclaw ensurePlugin decision tree", () => {
+  // Mirrors ensurePlugin's branching: install when missing, force-reinstall
+  // when below the floor, otherwise check for updates. The floor (0.7.4) was
+  // bumped to capture the enableKnowledgeTools wiring fix.
+  type Action = "install" | "reinstall" | "check-update";
+  const FLOOR = "0.7.4";
+
+  function decide(installed: boolean, currentVersion: string | null): Action {
+    function gte(c: string, r: string) {
+      const [aM, an, ap] = c.split(".").map(Number);
+      const [bM, bn, bp] = r.split(".").map(Number);
+      if (aM !== bM) return aM > bM;
+      if (an !== bn) return an > bn;
+      return ap >= bp;
+    }
+    if (!installed) return "install";
+    if (!currentVersion || !gte(currentVersion, FLOOR)) return "reinstall";
+    return "check-update";
+  }
+
+  it("installs when plugin is missing", () => {
+    expect(decide(false, null)).toBe("install");
+  });
+
+  it("reinstalls when below the floor (drops the enableKnowledgeTools fix)", () => {
+    expect(decide(true, "0.7.2")).toBe("reinstall");
+    expect(decide(true, "0.7.3")).toBe("reinstall");
+    expect(decide(true, "0.6.9")).toBe("reinstall");
+  });
+
+  it("checks for updates when at or above the floor", () => {
+    expect(decide(true, "0.7.4")).toBe("check-update");
+    expect(decide(true, "0.7.5")).toBe("check-update");
+    expect(decide(true, "0.8.0")).toBe("check-update");
+  });
+
+  it("reinstalls when version cannot be read (treats as below floor)", () => {
+    expect(decide(true, null)).toBe("reinstall");
+  });
+});
+
 describe("harness argument parsing", () => {
   function parseHarness(args: string[]): { harness?: string; sandbox?: string } {
     let harness: string | undefined;
