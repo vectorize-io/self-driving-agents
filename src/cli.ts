@@ -1093,6 +1093,11 @@ async function main() {
       ccConfig.dynamicBankId = true;
       ccConfig.dynamicBankGranularity = expectedGranularity;
       ccConfig.enableKnowledgeTools = true;
+      // Coalesce all worktrees of a repo into one bank by resolving the
+      // `project` field to the main repo basename instead of the cwd basename.
+      // Plugin default is already true, but pin it explicitly so future plugin
+      // version flips don't fragment a user's memory across worktrees.
+      ccConfig.resolveWorktrees = true;
       mkdirSync(ccConfigDir, { recursive: true });
       writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
       p.log.success(`Plugin config: ${color.dim(ccConfigPath)}`);

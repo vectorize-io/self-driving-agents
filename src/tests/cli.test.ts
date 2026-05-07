@@ -833,6 +833,9 @@ describe("claude-code Hindsight config persistence", () => {
       hindsightApiUrl: prompted.apiUrl,
       hindsightApiToken: prompted.apiToken,
       enableKnowledgeTools: true,
+      // Pin worktree resolution so all worktrees of a repo land in the same
+      // bank, matching what cli.ts writes during the claude-code install flow.
+      resolveWorktrees: true,
     };
   }
 
@@ -872,5 +875,17 @@ describe("claude-code Hindsight config persistence", () => {
       { apiUrl: "https://x.com", apiToken: "t" }
     );
     expect(result.enableKnowledgeTools).toBe(true);
+  });
+
+  it("always pins resolveWorktrees=true so worktrees share one bank", () => {
+    // Plugin already defaults to true, but SDA pins it explicitly so a future
+    // plugin default flip can't fragment a user's memory across worktrees.
+    const fresh = applyClaudeConfig({}, { apiUrl: "https://x.com", apiToken: "t" });
+    expect(fresh.resolveWorktrees).toBe(true);
+    const overridden = applyClaudeConfig(
+      { resolveWorktrees: false },
+      { apiUrl: "https://x.com", apiToken: "t" }
+    );
+    expect(overridden.resolveWorktrees).toBe(true);
   });
 });
