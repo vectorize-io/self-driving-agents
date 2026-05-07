@@ -272,7 +272,12 @@ function parseAgentsJson(raw: string): any[] {
   return JSON.parse(jsonStr);
 }
 
-async function ensurePlugin(): Promise<void> {
+// Install/upgrade the host-level hindsight-openclaw extension. Used by both
+// the openclaw flow (followed by the openclaw config wizard) and the nemoclaw
+// flow (which then handles config + sandbox network policy via its own setup
+// script). Splitting this out lets nemoclaw share the upgrade path without
+// triggering the openclaw-specific configuration wizard.
+async function ensureOpenClawPluginInstalled(): Promise<void> {
   const installed = isPluginInstalled();
   const currentVersion = installed ? getInstalledPluginVersion() : null;
   const needsInstall = !installed;
@@ -309,25 +314,32 @@ async function ensurePlugin(): Promise<void> {
       );
       process.exit(1);
     }
-  } else if (currentVersion) {
-    // Plugin meets the floor — still try to pull the latest minor/patch in case
-    // a newer release shipped fixes (mirrors the claude-code flow which always
-    // runs `claude plugin update`). Best-effort: if openclaw is already on the
-    // latest, this is a no-op; if it fails, we keep the current install.
-    p.log.info(`Hindsight plugin v${currentVersion} — checking for updates...`);
-    try {
-      execSync("openclaw plugins update hindsight-openclaw", { stdio: "pipe" });
-      const updated = getInstalledPluginVersion();
-      if (updated && updated !== currentVersion) {
-        p.log.success(`Hindsight plugin updated v${currentVersion} → v${updated}`);
-      } else {
-        p.log.info(`Hindsight plugin v${currentVersion} (already latest)`);
-      }
-    } catch (err: any) {
-      const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
-      p.log.warn(`Plugin update failed (keeping v${currentVersion}): ${msg.split("\n")[0]}`);
-    }
+    return;
   }
+
+  if (!currentVersion) return;
+
+  // Plugin meets the floor — still try to pull the latest minor/patch in case
+  // a newer release shipped fixes (mirrors the claude-code flow which always
+  // runs `claude plugin update`). Best-effort: if openclaw is already on the
+  // latest, this is a no-op; if it fails, we keep the current install.
+  p.log.info(`Hindsight plugin v${currentVersion} — checking for updates...`);
+  try {
+    execSync("openclaw plugins update hindsight-openclaw", { stdio: "pipe" });
+    const updated = getInstalledPluginVersion();
+    if (updated && updated !== currentVersion) {
+      p.log.success(`Hindsight plugin updated v${currentVersion} → v${updated}`);
+    } else {
+      p.log.info(`Hindsight plugin v${currentVersion} (already latest)`);
+    }
+  } catch (err: any) {
+    const msg = err?.stderr?.toString?.()?.trim() || err?.message || String(err);
+    p.log.warn(`Plugin update failed (keeping v${currentVersion}): ${msg.split("\n")[0]}`);
+  }
+}
+
+async function ensurePlugin(): Promise<void> {
+  await ensureOpenClawPluginInstalled();
 
   if (!isPluginConfigured()) {
     p.log.warn("Hindsight plugin needs configuration.");
@@ -881,6 +893,13 @@ async function main() {
       await ensureOpenClawAgentGranularity();
       ({ apiUrl, bankId, apiToken } = resolveFromPlugin(agentId));
     } else if (harness === "nemoclaw") {
+      // Plugin extension lives at the host level (~/.openclaw/extensions/...)
+      // and the sandbox just gets read-only Landlock access to it. The
+      // hindsight-nemoclaw setup script otherwise passes --skip-plugin-install
+      // when Hindsight is already configured, which means existing nemoclaw
+      // users never receive plugin upgrades. Run the openclaw install/upgrade
+      // path first so they get the same upgrade behavior as the openclaw flow.
+      await ensureOpenClawPluginInstalled();
       await ensureNemoClawPlugin(sandbox!, agentId);
       await ensureOpenClawAgentGranularity();
       ({ apiUrl, bankId, apiToken } = resolveFromPlugin(agentId));

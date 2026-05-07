@@ -347,9 +347,12 @@ describe("versionGte", () => {
   });
 });
 
-describe("openclaw ensurePlugin decision tree", () => {
-  // Mirrors ensurePlugin's branching: install when missing, force-reinstall
-  // when below the floor, otherwise check for updates. The floor (0.7.4) was
+describe("openclaw ensureOpenClawPluginInstalled decision tree", () => {
+  // Mirrors the install/upgrade branching shared by both the openclaw flow
+  // (ensurePlugin) and the nemoclaw flow (which now calls
+  // ensureOpenClawPluginInstalled before ensureNemoClawPlugin so existing
+  // nemoclaw users actually receive plugin upgrades — the nemoclaw setup
+  // script otherwise passes --skip-plugin-install). The floor (0.7.4) was
   // bumped to capture the enableKnowledgeTools wiring fix.
   type Action = "install" | "reinstall" | "check-update";
   const FLOOR = "0.7.4";
