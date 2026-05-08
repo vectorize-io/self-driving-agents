@@ -37,6 +37,14 @@ npx @vectorize-io/self-driving-agents install ./my-agent --harness claude
 npx @vectorize-io/self-driving-agents install my-org/my-repo/my-agent --harness openclaw
 ```
 
+Or start with a blank agent — no template, no seed content — using `--empty`:
+
+```bash
+npx @vectorize-io/self-driving-agents install my-agent --harness claude-code --empty
+```
+
+The first positional becomes the agent name. The CLI provisions the bank, sets up the harness, and lets you build everything up from the conversation.
+
 ## How it works
 
 1. You chat with the agent

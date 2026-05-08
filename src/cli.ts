@@ -68,6 +68,18 @@ function isLocalPath(input: string): boolean {
 }
 
 /**
+ * Whether a string is a valid agent name. Used by --empty mode where the
+ * first positional arg becomes the agent name (no path, no GitHub fetch).
+ *
+ * Rules: starts with [a-z0-9], then lowercase alphanumerics or hyphens, max
+ * 64 chars. Matches the lowercase-with-hyphens convention the create-agent
+ * skill expects.
+ */
+export function isValidAgentName(name: string): boolean {
+  return /^[a-z0-9][a-z0-9-]*$/.test(name) && name.length <= 64;
+}
+
+/**
  * Resolve the agent specifier to a local directory.
  *
  * - Local paths (./foo, /foo, ~/foo) → resolve directly
@@ -815,16 +827,19 @@ async function main() {
   ${color.bold("self-driving-agents")} — install a self-driving agent
 
   ${color.dim("Usage:")}
-    npx @vectorize-io/self-driving-agents install <agent> --harness <harness> [--agent <name>]
+    npx @vectorize-io/self-driving-agents install <agent> --harness <h>          ${color.dim("# from path or GitHub")}
+    npx @vectorize-io/self-driving-agents install <name>  --harness <h> --empty  ${color.dim("# blank agent")}
 
-  ${color.dim("Agent sources:")}
+  ${color.dim("Agent sources (without --empty):")}
     ${color.cyan("marketing-agent")}             → ${DEFAULT_REPO}/marketing-agent
     ${color.cyan("org/repo/my-agent")}           → org/repo/my-agent on GitHub
     ${color.cyan("./local-dir")}                 → local directory
 
   ${color.dim("Options:")}
     ${color.cyan("--harness <h>")}      Required. openclaw | nemoclaw | hermes | claude | claude-code
-    ${color.cyan("--agent <name>")}     Agent name (defaults to directory name)
+    ${color.cyan("--empty")}            Create a blank agent. First positional becomes the agent name;
+                       no content fetched, no bank-template imported from disk.
+    ${color.cyan("--agent <name>")}     Override the agent name (defaults to directory name)
     ${color.cyan("--sandbox <name>")}   NemoClaw sandbox (auto-detected if only one exists)
 `);
     process.exit(0);
@@ -841,11 +856,13 @@ async function main() {
   let harness: string | undefined;
   let agentName: string | undefined;
   let sandbox: string | undefined;
+  let isEmpty = false;
 
   for (let i = 0; i < restArgs.length; i++) {
     if (restArgs[i] === "--harness" && restArgs[i + 1]) harness = restArgs[++i];
     else if (restArgs[i] === "--agent" && restArgs[i + 1]) agentName = restArgs[++i];
     else if (restArgs[i] === "--sandbox" && restArgs[i + 1]) sandbox = restArgs[++i];
+    else if (restArgs[i] === "--empty") isEmpty = true;
   }
 
   if (!harness) {
@@ -859,9 +876,34 @@ async function main() {
 
   p.intro(color.bgCyan(color.black(` self-driving-agents `)));
 
-  // Step 0: Resolve agent directory (local or GitHub)
+  // Step 0: Resolve agent directory (local or GitHub) — skipped when --empty
+  // is set; in that case the first positional becomes the agent name and
+  // there's no source content to ingest.
   const spin = p.spinner();
-  const { dir, source, defaultName, cleanup } = await resolveAgentDir(dirArg, spin);
+  let dir = "";
+  let source: string;
+  let defaultName: string;
+  let cleanup: (() => void) | undefined;
+
+  if (isEmpty) {
+    if (!dirArg || dirArg.startsWith("-")) {
+      p.cancel(
+        "--empty needs an agent name as the first positional argument.\n" +
+          "  e.g. install my-agent --harness claude-code --empty"
+      );
+      process.exit(1);
+    }
+    if (!isValidAgentName(dirArg)) {
+      p.cancel(
+        `Invalid agent name '${dirArg}'. Use lowercase letters, digits, and hyphens (max 64 chars), e.g. my-agent.`
+      );
+      process.exit(1);
+    }
+    source = "<empty>";
+    defaultName = dirArg;
+  } else {
+    ({ dir, source, defaultName, cleanup } = await resolveAgentDir(dirArg, spin));
+  }
 
   try {
     let agentId: string;
@@ -1102,22 +1144,24 @@ async function main() {
       writeFileSync(ccConfigPath, JSON.stringify(ccConfig, null, 2) + "\n");
       p.log.success(`Plugin config: ${color.dim(ccConfigPath)}`);
 
-      // Step 4: Save content locally for the agent
-      const contentDir = join(homedir(), ".self-driving-agents", "claude-code", agentId);
-      mkdirSync(contentDir, { recursive: true });
-      // Copy content files to the local dir
-      const contentFiles = findContentFiles(dir);
-      for (const relPath of contentFiles) {
-        const destPath = join(contentDir, relPath);
-        mkdirSync(join(destPath, ".."), { recursive: true });
-        writeFileSync(destPath, readFileSync(join(dir, relPath), "utf-8"));
+      // Step 4: Save content locally for the agent (skipped when --empty —
+      // the create-agent skill goes interactive without a `from <path>`).
+      let contentDir: string | null = null;
+      if (!isEmpty) {
+        contentDir = join(homedir(), ".self-driving-agents", "claude-code", agentId);
+        mkdirSync(contentDir, { recursive: true });
+        const contentFiles = findContentFiles(dir);
+        for (const relPath of contentFiles) {
+          const destPath = join(contentDir, relPath);
+          mkdirSync(join(destPath, ".."), { recursive: true });
+          writeFileSync(destPath, readFileSync(join(dir, relPath), "utf-8"));
+        }
+        const templateSrc = join(dir, "bank-template.json");
+        if (existsSync(templateSrc)) {
+          writeFileSync(join(contentDir, "bank-template.json"), readFileSync(templateSrc, "utf-8"));
+        }
+        p.log.success(`Content saved to ${color.dim(contentDir)} (${contentFiles.length} files)`);
       }
-      // Copy bank-template.json if present (has mental model definitions)
-      const templateSrc = join(dir, "bank-template.json");
-      if (existsSync(templateSrc)) {
-        writeFileSync(join(contentDir, "bank-template.json"), readFileSync(templateSrc, "utf-8"));
-      }
-      p.log.success(`Content saved to ${color.dim(contentDir)} (${contentFiles.length} files)`);
 
       // Auto-approve hindsight MCP tools and skills in user settings
       const userSettingsPath = join(homedir(), ".claude", "settings.json");
@@ -1151,7 +1195,11 @@ async function main() {
         p.log.success("Auto-approved hindsight tools in Claude Code");
       }
 
-      const prompt = `/hindsight-memory:create-agent ${agentId} from ${contentDir}`;
+      // With --empty the skill runs interactively (Mode B); otherwise it
+      // ingests from the staged content directory (Mode A).
+      const prompt = contentDir
+        ? `/hindsight-memory:create-agent ${agentId} from ${contentDir}`
+        : `/hindsight-memory:create-agent ${agentId}`;
 
       p.note(
         [
@@ -1211,21 +1259,25 @@ async function main() {
       process.exit(1);
     }
 
-    // Step 4: Import bank template
-    const templatePath = join(dir, "bank-template.json");
-    if (existsSync(templatePath)) {
-      spin.start("Importing bank template...");
-      const template = JSON.parse(readFileSync(templatePath, "utf-8"));
+    // Step 4: Import bank template — or, with --empty, provision a blank
+    // bank so later writes from the harness have somewhere to land.
+    const templatePath = isEmpty ? "" : join(dir, "bank-template.json");
+    const hasTemplate = !isEmpty && existsSync(templatePath);
+    if (isEmpty || hasTemplate) {
+      spin.start(isEmpty ? "Provisioning bank..." : "Importing bank template...");
+      const template = hasTemplate
+        ? JSON.parse(readFileSync(templatePath, "utf-8"))
+        : { version: "1" };
       await sdk.importBankTemplate({
         client: lowLevel,
         path: { bank_id: bankId },
         body: template,
       });
-      spin.stop("Bank template imported");
+      spin.stop(isEmpty ? "Bank provisioned" : "Bank template imported");
     }
 
     // Step 5: Ingest content (recursive — all text files except bank-template.json)
-    const contentFiles = findContentFiles(dir);
+    const contentFiles = isEmpty ? [] : findContentFiles(dir);
     if (contentFiles.length > 0) {
       spin.start(`Ingesting ${contentFiles.length} file(s)...`);
       for (const relPath of contentFiles) {

@@ -163,6 +163,103 @@ describe("isLocalPath", () => {
   });
 });
 
+describe("isValidAgentName", () => {
+  // Mirrors the regex in cli.ts. --empty mode validates the first positional
+  // arg (the agent name) against this since there's no path/GitHub fetch to
+  // implicitly sanitize.
+  function isValidAgentName(name: string): boolean {
+    return /^[a-z0-9][a-z0-9-]*$/.test(name) && name.length <= 64;
+  }
+
+  it("accepts lowercase with hyphens", () => {
+    expect(isValidAgentName("my-agent")).toBe(true);
+    expect(isValidAgentName("marketing-seo")).toBe(true);
+    expect(isValidAgentName("agent")).toBe(true);
+    expect(isValidAgentName("a1b2c3")).toBe(true);
+  });
+
+  it("accepts a single character", () => {
+    expect(isValidAgentName("a")).toBe(true);
+    expect(isValidAgentName("0")).toBe(true);
+  });
+
+  it("rejects uppercase", () => {
+    expect(isValidAgentName("MyAgent")).toBe(false);
+    expect(isValidAgentName("AGENT")).toBe(false);
+  });
+
+  it("rejects names starting with hyphen", () => {
+    expect(isValidAgentName("-agent")).toBe(false);
+    expect(isValidAgentName("--empty")).toBe(false);
+  });
+
+  it("rejects empty string", () => {
+    expect(isValidAgentName("")).toBe(false);
+  });
+
+  it("rejects whitespace", () => {
+    expect(isValidAgentName("my agent")).toBe(false);
+    expect(isValidAgentName(" my-agent")).toBe(false);
+  });
+
+  it("rejects underscores and other punctuation", () => {
+    expect(isValidAgentName("my_agent")).toBe(false);
+    expect(isValidAgentName("my.agent")).toBe(false);
+    expect(isValidAgentName("my/agent")).toBe(false);
+  });
+
+  it("rejects names longer than 64 characters", () => {
+    expect(isValidAgentName("a".repeat(64))).toBe(true);
+    expect(isValidAgentName("a".repeat(65))).toBe(false);
+  });
+});
+
+describe("--empty arg parsing", () => {
+  // Mirrors the loop in main() that walks restArgs to pick out flag values.
+  function parseRestArgs(restArgs: string[]) {
+    let harness: string | undefined;
+    let agentName: string | undefined;
+    let sandbox: string | undefined;
+    let isEmpty = false;
+    for (let i = 0; i < restArgs.length; i++) {
+      if (restArgs[i] === "--harness" && restArgs[i + 1]) harness = restArgs[++i];
+      else if (restArgs[i] === "--agent" && restArgs[i + 1]) agentName = restArgs[++i];
+      else if (restArgs[i] === "--sandbox" && restArgs[i + 1]) sandbox = restArgs[++i];
+      else if (restArgs[i] === "--empty") isEmpty = true;
+    }
+    return { harness, agentName, sandbox, isEmpty };
+  }
+
+  it("picks up --empty as a boolean", () => {
+    expect(parseRestArgs(["--harness", "claude-code", "--empty"]).isEmpty).toBe(true);
+    expect(parseRestArgs(["--harness", "claude-code"]).isEmpty).toBe(false);
+  });
+
+  it("--empty does not consume the next argument", () => {
+    const r = parseRestArgs(["--empty", "--harness", "claude-code"]);
+    expect(r.isEmpty).toBe(true);
+    expect(r.harness).toBe("claude-code");
+  });
+
+  it("works alongside --harness, --agent, --sandbox", () => {
+    const r = parseRestArgs([
+      "--harness",
+      "nemoclaw",
+      "--empty",
+      "--agent",
+      "my-agent",
+      "--sandbox",
+      "default",
+    ]);
+    expect(r).toEqual({
+      harness: "nemoclaw",
+      agentName: "my-agent",
+      sandbox: "default",
+      isEmpty: true,
+    });
+  });
+});
+
 describe("deriveDefaultName", () => {
   // Mirrors the logic in resolveAgentDir:
   // - GitHub refs: subpath with / → hyphens (marketing/seo → marketing-seo)
