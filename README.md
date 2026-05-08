@@ -28,6 +28,18 @@ npx @vectorize-io/self-driving-agents install marketing/seo --harness openclaw
 npx @vectorize-io/self-driving-agents install marketing/seo --harness nemoclaw
 ```
 
+### Hermes
+
+```bash
+npx @vectorize-io/self-driving-agents install marketing/seo --harness hermes
+```
+
+### Claude Code
+
+```bash
+npx @vectorize-io/self-driving-agents install marketing/seo --harness claude-code
+```
+
 That's it. The CLI fetches the agent from this repo, sets up its memory bank, ingests the seed knowledge, and registers it with your harness. Follow the on-screen instructions to start chatting.
 
 You can also point at a local directory or any GitHub repo:
@@ -118,8 +130,10 @@ For OpenClaw and NemoClaw, the CLI installs the Hindsight plugin, creates a work
 |---------|------|--------|
 | [Claude Chat](https://claude.ai) | `--harness claude` | Supported |
 | [Claude Cowork](https://claude.ai) | `--harness claude` | Supported |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | `--harness claude-code` | Supported |
 | [OpenClaw](https://openclaw.dev) | `--harness openclaw` | Supported |
 | [NemoClaw](https://github.com/NVIDIA/NeMo-Agent) | `--harness nemoclaw` | Supported |
+| [Hermes](https://github.com/NousResearch/hermes-agent) | `--harness hermes` | Supported |
 
 ## Requirements
 
