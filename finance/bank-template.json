@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract financial decisions, accounting treatments, FP&A assumptions, tax positions, investment theses, controls, and outcomes (variances, returns, audit findings).",
+    "observations_mission": "Observations are stable facts about the entity's financial structure, accounting policies, fiscal calendar, jurisdictions, key counterparties, and recurring controls. Ignore one-off journal entries and transient market noise."
+  },
+  "mental_models": [
+    {
+      "id": "financial-position",
+      "name": "Financial Position",
+      "max_tokens": 4096,
+      "source_query": "What is the entity's financial position? Capital structure, runway, key revenue/cost drivers, and recent variances vs plan.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "policies-and-controls",
+      "name": "Policies & Controls",
+      "max_tokens": 4096,
+      "source_query": "What accounting policies, tax positions, and internal controls are in force? Note jurisdictions, materiality thresholds, and any audit findings.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

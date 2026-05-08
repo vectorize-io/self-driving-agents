@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract product strategy decisions, prioritization rationale, user research synthesis, behavioral experiments, sprint outcomes, and trend signals that shape the roadmap.",
+    "observations_mission": "Observations are stable facts about the product's users, jobs-to-be-done, north-star metric, prioritization framework, and recurring sources of customer feedback. Ignore one-off feature requests and ephemeral roadmap shuffles."
+  },
+  "mental_models": [
+    {
+      "id": "product-strategy",
+      "name": "Product Strategy",
+      "max_tokens": 4096,
+      "source_query": "What is the product strategy? Target users, jobs-to-be-done, north-star metric, key bets, and the prioritization framework in use.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "user-signal",
+      "name": "User Signal",
+      "max_tokens": 4096,
+      "source_query": "What are users telling us through research, support, and behavior? Include synthesized themes, validated hypotheses, and trend signals worth tracking.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

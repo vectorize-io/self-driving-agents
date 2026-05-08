@@ -1,0 +1,45 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract gameplay design decisions, technical-art and engine choices, multiplayer/networking approaches, performance budgets, audio direction, narrative beats, and playtest feedback across Unity, Unreal, Godot, Roblox, and Blender pipelines.",
+    "observations_mission": "Observations are stable facts about the game's pillars, target platforms, engine and toolchain, performance budgets, content pipelines, and recurring playtest feedback. Ignore one-off bugs and discarded prototype branches."
+  },
+  "mental_models": [
+    {
+      "id": "game-pillars",
+      "name": "Game Pillars",
+      "max_tokens": 4096,
+      "source_query": "What are the game's design pillars, core loops, target audience, and platform constraints? What aesthetic and tone decisions are locked?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "tech-stack",
+      "name": "Tech Stack & Pipelines",
+      "max_tokens": 4096,
+      "source_query": "What engine, tools, and pipelines are in use? Include performance budgets (frame time, memory, draw calls), networking model, and content authoring conventions.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "playtest-learnings",
+      "name": "Playtest Learnings",
+      "max_tokens": 4096,
+      "source_query": "What patterns have emerged from playtests and metrics? Which mechanics, levels, and narrative beats land well or poorly, and what changes have we tried?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

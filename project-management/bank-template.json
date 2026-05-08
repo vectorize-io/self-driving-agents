@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract project plans, milestones, dependencies, risks, decisions, and outcomes. Capture how Jira/PM workflows are structured, how studios run sprints, and how experiments are tracked.",
+    "observations_mission": "Observations are stable facts about teams, tooling (Jira, etc.), cadences, definitions of done, escalation paths, and recurring risk patterns. Ignore one-off ticket churn."
+  },
+  "mental_models": [
+    {
+      "id": "delivery-cadence",
+      "name": "Delivery Cadence",
+      "max_tokens": 4096,
+      "source_query": "How does the team plan and ship work? Sprint length, ceremonies, definition of done, branching, and release cadence.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "risk-and-dependencies",
+      "name": "Risks & Dependencies",
+      "max_tokens": 4096,
+      "source_query": "What risks, blockers, and cross-team dependencies recur? Include mitigation patterns that have actually worked.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

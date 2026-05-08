@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract domain-specific decisions, regulatory and compliance constraints, workflow designs, and outcomes across the specialized practices represented here (legal, healthcare, real estate, HR, compliance, identity/trust, blockchain, regional consulting, document generation, and more).",
+    "observations_mission": "Observations are stable facts about the practice area, jurisdictions, regulatory regimes, key counterparties, and recurring workflows. Ignore one-off matters and ephemeral case noise."
+  },
+  "mental_models": [
+    {
+      "id": "domain-context",
+      "name": "Domain Context",
+      "max_tokens": 4096,
+      "source_query": "What domain is the user operating in, and what regulatory, jurisdictional, and stakeholder constraints apply? Include the specialty (legal, healthcare, finance ops, identity, etc.) and the locale.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "workflow-patterns",
+      "name": "Workflow Patterns",
+      "max_tokens": 4096,
+      "source_query": "Which workflows, document templates, and review/approval steps recur? What patterns have proven reliable, and where do exceptions usually appear?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

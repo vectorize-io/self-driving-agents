@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract support-operations decisions, response playbooks, escalation paths, infrastructure-maintenance outcomes, compliance checks, executive-summary findings, and analytics observations.",
+    "observations_mission": "Observations are stable facts about the support stack, SLAs, escalation paths, recurring issue categories, and compliance obligations. Ignore one-off ticket details."
+  },
+  "mental_models": [
+    {
+      "id": "support-operations",
+      "name": "Support Operations",
+      "max_tokens": 4096,
+      "source_query": "How does support operate? Channels, SLAs, escalation paths, and the tools/playbooks the team relies on.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "issue-trends",
+      "name": "Issue Trends",
+      "max_tokens": 4096,
+      "source_query": "What issue categories recur, what's their volume and resolution time, and which response patterns work best? Include compliance and infra-maintenance themes.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

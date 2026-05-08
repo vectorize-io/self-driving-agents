@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract test strategies, accessibility audits, performance benchmarks, evidence captured, tool evaluations, reality-check findings, and workflow optimizations. Include both passing and failing outcomes with numbers.",
+    "observations_mission": "Observations are stable facts about the test stack, environments, coverage targets, accessibility/performance baselines, and recurring failure modes. Ignore one-off flaky-run noise."
+  },
+  "mental_models": [
+    {
+      "id": "test-strategy",
+      "name": "Test Strategy",
+      "max_tokens": 4096,
+      "source_query": "What is the overall test strategy? Layers (unit/integration/e2e/perf/a11y), tools, environments, coverage targets, and CI gates.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "quality-baselines",
+      "name": "Quality Baselines",
+      "max_tokens": 4096,
+      "source_query": "What are our accessibility, performance, and reliability baselines? Include benchmark numbers, regression patterns, and recurring failure modes.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

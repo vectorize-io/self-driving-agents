@@ -1,0 +1,45 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract architectural decisions, API contracts, performance numbers, incident root causes, code review patterns, deployment outcomes, and technical trade-offs across backend, frontend, infrastructure, and security domains.",
+    "observations_mission": "Observations are stable facts about the codebase, stack, conventions, ownership, deployment topology, performance baselines, and recurring failure modes. Ignore one-off debugging sessions and ephemeral build issues."
+  },
+  "mental_models": [
+    {
+      "id": "system-architecture",
+      "name": "System Architecture",
+      "max_tokens": 4096,
+      "source_query": "What is the system architecture? Services, data flow, key dependencies, deployment targets, and the major design decisions behind them.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "engineering-conventions",
+      "name": "Engineering Conventions",
+      "max_tokens": 4096,
+      "source_query": "What conventions does the team follow? Code style, review patterns, testing standards, branching/release flow, and recurring critique points.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "operational-baselines",
+      "name": "Operational Baselines",
+      "max_tokens": 4096,
+      "source_query": "What are the performance, reliability, and security baselines? Include SLOs, latency/throughput numbers, known failure modes, and incident lessons.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

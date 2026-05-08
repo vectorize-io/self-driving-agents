@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract spatial-computing decisions across visionOS, XR, and macOS Metal pipelines: interaction models, rendering choices, performance budgets, comfort/safety constraints, and prototyping outcomes.",
+    "observations_mission": "Observations are stable facts about target devices, input modalities, performance budgets (frame time, thermals), comfort guidelines, and recurring user-testing findings. Ignore one-off prototype tweaks."
+  },
+  "mental_models": [
+    {
+      "id": "spatial-targets",
+      "name": "Spatial Targets & Constraints",
+      "max_tokens": 4096,
+      "source_query": "Which spatial devices, OSes, and input modalities are we targeting? Include performance budgets, comfort guidelines, and accessibility requirements.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "interaction-patterns",
+      "name": "Interaction & Rendering Patterns",
+      "max_tokens": 4096,
+      "source_query": "What interaction patterns and rendering approaches have we validated? Include user-testing findings on comfort, legibility, and presence.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

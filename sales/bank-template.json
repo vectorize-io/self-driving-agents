@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract account plans, deal stages, discovery findings, objections, proposals, pipeline metrics, and outcomes (won/lost reasons). Capture coaching feedback and outbound experiments.",
+    "observations_mission": "Observations are stable facts about target accounts, ICP, buying committee patterns, common objections, pricing/packaging, and what consistently moves deals forward. Ignore one-off email exchanges and stalled-deal noise."
+  },
+  "mental_models": [
+    {
+      "id": "icp-and-buyer",
+      "name": "ICP & Buyer Personas",
+      "max_tokens": 4096,
+      "source_query": "Who is the ideal customer profile and what does the buying committee look like? Include common objections and proven discovery questions.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "pipeline-patterns",
+      "name": "Pipeline Patterns",
+      "max_tokens": 4096,
+      "source_query": "What patterns drive pipeline progression and conversion? Include win/loss reasons, deal-stage benchmarks, and outbound tactics that work.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

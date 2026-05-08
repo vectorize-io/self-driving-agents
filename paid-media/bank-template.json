@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract paid-media campaign structures, creative tests, audience and keyword decisions, bidding strategies, attribution/tracking setups, and performance outcomes (CPA, ROAS, CTR, frequency) across PPC, paid social, programmatic, and search.",
+    "observations_mission": "Observations are stable facts about accounts, KPIs, target audiences, brand guardrails, attribution model, tracking stack, and creative principles that consistently work or fail. Ignore daily metric noise and one-off A/B variants."
+  },
+  "mental_models": [
+    {
+      "id": "account-structure",
+      "name": "Account Structure",
+      "max_tokens": 4096,
+      "source_query": "How are paid-media accounts and campaigns organized? Channels, audiences, creative themes, attribution model, and tracking setup.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "performance-patterns",
+      "name": "Performance Patterns",
+      "max_tokens": 4096,
+      "source_query": "What creative, audience, and bidding patterns drive performance? Include winning/losing tests with numbers (CPA, ROAS, CTR) and any seasonality.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

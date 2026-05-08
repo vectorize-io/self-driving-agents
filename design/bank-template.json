@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract design decisions, brand guidelines, visual systems, UX research findings, accessibility constraints, design critique outcomes, and stakeholder feedback on creative work.",
+    "observations_mission": "Observations are stable facts about brand voice, visual identity, typography and color systems, accessibility requirements, target users, and recurring design preferences. Ignore one-off explorations and discarded concepts."
+  },
+  "mental_models": [
+    {
+      "id": "brand-system",
+      "name": "Brand & Visual System",
+      "max_tokens": 4096,
+      "source_query": "What are the brand guidelines, voice, visual identity, typography, color, and component conventions? What's locked vs. flexible?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "user-insights",
+      "name": "User Insights",
+      "max_tokens": 4096,
+      "source_query": "Who are the target users, what are their needs, and what UX research findings have we observed? Include accessibility constraints and validated patterns.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}
