@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AgentCard } from '@/components/AgentCard';
 import { CodeBlock } from '@/components/CodeBlock';
+import { HarnessCodeBlock } from '@/components/HarnessCodeBlock';
 import { HarnessLogo } from '@/components/HarnessLogo';
 import { loadRoots } from '@/lib/agents';
 import { HARNESSES } from '@/lib/harnesses';
@@ -45,9 +46,12 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10 max-w-2xl">
-              <CodeBlock code="npx @vectorize-io/self-driving-agents install marketing/seo --harness claude-code" />
+              <HarnessCodeBlock
+                template="npx @vectorize-io/self-driving-agents install marketing/seo --harness {harness}"
+              />
               <p className="mt-2 text-xs text-ink-400">
-                Replace the agent slug or harness flag with whichever combo you want.
+                Pick your harness above, or replace the agent slug with any
+                template you want.
               </p>
             </div>
           </div>

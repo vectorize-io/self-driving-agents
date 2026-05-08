@@ -7,9 +7,10 @@ interface Props {
 }
 
 export function AgentCard({ agent, href }: Props) {
-  const mission = agent.bank?.reflect_mission ?? '';
+  const mission = agent.bank?.retain_mission ?? '';
   const trimmedMission =
     mission.length > 200 ? mission.slice(0, 197).trimEnd() + '…' : mission;
+  const modelNames = agent.mentalModels.map((m) => m.name);
 
   return (
     <Link
@@ -30,7 +31,7 @@ export function AgentCard({ agent, href }: Props) {
           {trimmedMission}
         </p>
       )}
-      {agent.children.length > 0 && (
+      {agent.children.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {agent.children.map((c) => (
             <span
@@ -41,7 +42,18 @@ export function AgentCard({ agent, href }: Props) {
             </span>
           ))}
         </div>
-      )}
+      ) : modelNames.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {modelNames.map((name) => (
+            <span
+              key={name}
+              className="rounded-md bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-600"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </Link>
   );
 }

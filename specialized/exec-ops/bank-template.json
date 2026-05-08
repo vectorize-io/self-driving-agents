@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract chief-of-staff and agents-orchestrator decisions on prioritization, coordination, and orchestration.",
+    "observations_mission": "Observations are stable facts about leadership cadence, decision rights, and orchestration patterns across agents and teams. Ignore one-off scheduling."
+  },
+  "mental_models": [
+    {
+      "id": "leadership-cadence",
+      "name": "Leadership Cadence",
+      "max_tokens": 4096,
+      "source_query": "What is the leadership operating cadence? Include forums, decision rights, and follow-through.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "orchestration-patterns",
+      "name": "Orchestration Patterns",
+      "max_tokens": 4096,
+      "source_query": "What orchestration patterns work across agents and teams? Include handoffs and accountability.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

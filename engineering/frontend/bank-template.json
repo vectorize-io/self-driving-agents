@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract frontend-development decisions, mobile-app patterns, and platform-specific conventions (incl. WeChat mini-programs).",
+    "observations_mission": "Observations are stable facts about the frontend stack, component conventions, target browsers/devices, and recurring UI bugs. Ignore one-off styling tweaks."
+  },
+  "mental_models": [
+    {
+      "id": "frontend-stack",
+      "name": "Frontend Stack",
+      "max_tokens": 4096,
+      "source_query": "What is the frontend stack? Frameworks, build, state, styling conventions.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "platform-targets",
+      "name": "Platform Targets",
+      "max_tokens": 4096,
+      "source_query": "What platforms (web, mobile, mini-program) do we support, and what platform-specific conventions hold?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

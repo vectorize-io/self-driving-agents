@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract UX research findings, IA decisions, interaction patterns, usability test outcomes, and UI component standards. Capture stakeholder feedback and accepted vs. rejected proposals.",
+    "observations_mission": "Observations are stable facts about target users, jobs-to-be-done, validated patterns, accessibility constraints, and the user's design-system conventions. Ignore one-off prototype tweaks."
+  },
+  "mental_models": [
+    {
+      "id": "user-insights",
+      "name": "User Insights",
+      "max_tokens": 4096,
+      "source_query": "Who are the target users, what jobs are they hiring the product for, and what UX research findings have we observed?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "interaction-patterns",
+      "name": "Interaction Patterns",
+      "max_tokens": 4096,
+      "source_query": "Which interaction patterns and UI components have we validated? Include accessibility constraints and known anti-patterns.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

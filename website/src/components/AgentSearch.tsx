@@ -11,8 +11,10 @@ export interface AgentCardData {
   /** lower-cased haystack: name, slug, mission, file names, etc. */
   search: string;
   isTopLevel: boolean;
+  /** observations_mission — what this agent watches for. */
   mission: string;
   childrenNames: string[];
+  mentalModelNames: string[];
 }
 
 interface Props {
@@ -129,7 +131,7 @@ export function AgentSearch({ cards }: Props) {
                     {trimmed}
                   </p>
                 )}
-                {c.childrenNames.length > 0 && (
+                {c.childrenNames.length > 0 ? (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {c.childrenNames.map((name) => (
                       <span
@@ -140,7 +142,18 @@ export function AgentSearch({ cards }: Props) {
                       </span>
                     ))}
                   </div>
-                )}
+                ) : c.mentalModelNames.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {c.mentalModelNames.map((name) => (
+                      <span
+                        key={name}
+                        className="rounded-md bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-600"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </Link>
             );
           })}

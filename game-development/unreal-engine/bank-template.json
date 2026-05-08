@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract Unreal world-building, multiplayer-architecture, technical-art, and systems-engineering decisions.",
+    "observations_mission": "Observations are stable facts about Unreal version, networking model (replicated graph etc.), Niagara/Nanite usage, and systems-engineering patterns. Ignore transient blueprint experiments."
+  },
+  "mental_models": [
+    {
+      "id": "unreal-stack",
+      "name": "Unreal Stack",
+      "max_tokens": 4096,
+      "source_query": "What Unreal version, networking model, and rendering features are in use?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "unreal-patterns",
+      "name": "Unreal Patterns",
+      "max_tokens": 4096,
+      "source_query": "What world-building, multiplayer, and tech-art patterns work in this project?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

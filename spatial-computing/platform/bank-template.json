@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract platform-engineering decisions across visionOS, macOS Metal, and terminal/spatial integrations: rendering, performance budgets, and integration patterns.",
+    "observations_mission": "Observations are stable facts about target OSes, performance budgets (frame time, thermals), rendering pipelines, and integration boundaries. Ignore transient build issues."
+  },
+  "mental_models": [
+    {
+      "id": "platform-targets",
+      "name": "Platform Targets",
+      "max_tokens": 4096,
+      "source_query": "Which platforms and OS versions are we shipping to, and what performance budgets apply?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "rendering-and-integration",
+      "name": "Rendering & Integration",
+      "max_tokens": 4096,
+      "source_query": "What rendering approaches and integration patterns have we validated on each platform?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

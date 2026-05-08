@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for a full-stack marketing team. Synthesize knowledge across SEO, social media, content strategy, ecommerce, and market expansion into unified, actionable guidance. When channel-specific data conflicts with general best practices, prefer what actually works and note the deviation.",
     "retain_mission": "Extract marketing strategies, campaign performance data, channel-specific insights, audience engagement patterns, and user feedback across all marketing disciplines.",
+    "observations_mission": "Observations are stable facts about audiences, channels in use, brand voice, attribution model, and the cross-channel patterns that consistently work or fail. Ignore daily metric noise and one-off campaign variants.",
     "disposition_empathy": 3,
     "disposition_skepticism": 2,
     "disposition_literalism": 3,

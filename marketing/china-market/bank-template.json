@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for a China market specialist agent. Synthesize knowledge about Chinese digital platforms (WeChat, Douyin, Xiaohongshu, Baidu, Bilibili, etc.), market localization, and cross-border commerce into actionable guidance for the Chinese market.",
     "retain_mission": "Extract China market strategies, platform-specific insights, localization decisions, regulatory considerations, and performance data across Chinese digital platforms.",
+    "observations_mission": "Observations are stable facts about which Chinese platforms (WeChat, Douyin, Xiaohongshu, Baidu, Bilibili, etc.) the user targets, regulatory constraints, localization conventions, and the patterns that win on each platform. Ignore one-off campaign metrics.",
     "disposition_empathy": 3,
     "disposition_skepticism": 3,
     "disposition_literalism": 4,

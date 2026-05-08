@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract brand guidelines, visual systems, image-direction prompts, accessibility/inclusive-visuals constraints, and storytelling decisions. Capture critique outcomes and locked vs. flexible elements.",
+    "observations_mission": "Observations are stable facts about brand voice, typography, color, illustration/photography style, accessibility requirements, and recurring visual preferences. Ignore one-off explorations."
+  },
+  "mental_models": [
+    {
+      "id": "brand-system",
+      "name": "Brand & Visual System",
+      "max_tokens": 4096,
+      "source_query": "What are the brand guidelines, voice, typography, color, and component conventions? What is locked vs. flexible?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "creative-direction",
+      "name": "Creative Direction",
+      "max_tokens": 4096,
+      "source_query": "What creative-direction patterns work for this brand? Include image-prompt conventions, storytelling beats, and accessibility/inclusion guardrails.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

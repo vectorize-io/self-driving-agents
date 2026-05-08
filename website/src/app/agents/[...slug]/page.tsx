@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import { CodeBlock } from '@/components/CodeBlock';
+import { HarnessCodeBlock } from '@/components/HarnessCodeBlock';
 import { findAgent, flattenAgents, type AgentFile } from '@/lib/agents';
-import { HARNESSES } from '@/lib/harnesses';
 import { link } from '@/lib/link';
 
 interface Params {
@@ -25,7 +25,7 @@ export async function generateMetadata({
   if (!agent) return {};
   return {
     title: agent.displayName,
-    description: agent.bank?.reflect_mission ?? '',
+    description: agent.bank?.retain_mission ?? '',
   };
 }
 
@@ -52,8 +52,7 @@ export default async function AgentDetailPage({
     return { label: seg, href: link(`/agents/${sub}`) };
   });
 
-  const installCmd = (slugArg: string) =>
-    `npx @vectorize-io/self-driving-agents install ${agent.slug} --harness ${slugArg}`;
+  const installTemplate = `npx @vectorize-io/self-driving-agents install ${agent.slug} --harness {harness}`;
 
   return (
     <>
@@ -99,10 +98,22 @@ export default async function AgentDetailPage({
             </div>
           </div>
 
-          {agent.bank?.reflect_mission && (
+          {agent.bank?.retain_mission && (
             <p className="mt-5 max-w-3xl text-lg leading-relaxed text-ink-600">
-              {agent.bank.reflect_mission}
+              {agent.bank.retain_mission}
             </p>
+          )}
+          {agent.mentalModels.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {agent.mentalModels.map((m) => (
+                <span
+                  key={m.id}
+                  className="rounded-md bg-ink-100 px-2 py-0.5 text-xs font-medium text-ink-600"
+                >
+                  {m.name}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </section>
@@ -113,26 +124,18 @@ export default async function AgentDetailPage({
           <h2 className="text-xl font-semibold text-ink-900">Install</h2>
           <p className="mt-1 text-sm text-ink-500">
             Pick the harness that matches where you'll chat with the agent.
+            Need details? See the{' '}
+            <Link
+              href={link('/harnesses')}
+              className="font-medium text-accent-600 hover:underline"
+            >
+              harness pages
+            </Link>
+            .
           </p>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {HARNESSES.map((h) => (
-              <div
-                key={h.slug}
-                className="rounded-xl border border-ink-200 bg-white p-4"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-ink-900">{h.name}</span>
-                  <Link
-                    href={link(`/harnesses/${h.slug}`)}
-                    className="text-xs font-medium text-accent-600 hover:underline"
-                  >
-                    docs →
-                  </Link>
-                </div>
-                <CodeBlock code={installCmd(h.slug)} />
-              </div>
-            ))}
+          <div className="mt-5 max-w-3xl">
+            <HarnessCodeBlock template={installTemplate} />
           </div>
         </div>
       </section>
@@ -147,13 +150,13 @@ export default async function AgentDetailPage({
             </p>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              {agent.bank.reflect_mission && (
+              {agent.bank.observations_mission && (
                 <div className="rounded-xl border border-ink-200 bg-ink-50 p-4">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
-                    Reflect mission
+                    Observations mission
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-ink-700">
-                    {agent.bank.reflect_mission}
+                    {agent.bank.observations_mission}
                   </p>
                 </div>
               )}

@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract sales-data-extraction and outbound-outreach decisions and outcomes.",
+    "observations_mission": "Observations are stable facts about data sources, enrichment quality, and outreach patterns that work. Ignore daily reply-rate noise."
+  },
+  "mental_models": [
+    {
+      "id": "data-sources",
+      "name": "Data Sources",
+      "max_tokens": 4096,
+      "source_query": "Which data sources do we use for sales extraction, and how do we score quality?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "outreach-patterns",
+      "name": "Outreach Patterns",
+      "max_tokens": 4096,
+      "source_query": "What outbound patterns convert? Include sequences, channels, and message frames that work.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

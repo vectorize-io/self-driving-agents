@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract domain-expert decisions across civil engineering, supply chain, government presales, and developer relations.",
+    "observations_mission": "Observations are stable facts about each domain's regulations, key counterparties, and engagement patterns. Ignore one-off project notes."
+  },
+  "mental_models": [
+    {
+      "id": "domain-context",
+      "name": "Domain Context",
+      "max_tokens": 4096,
+      "source_query": "What domain and regulatory context applies? Include key counterparties and stakeholders.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "engagement-patterns",
+      "name": "Engagement Patterns",
+      "max_tokens": 4096,
+      "source_query": "What engagement and delivery patterns work in each domain? Include lessons from past projects.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

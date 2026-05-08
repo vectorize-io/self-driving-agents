@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract account plans, deal stages, objections, proposals, and outcomes for outbound and account-based motions.",
+    "observations_mission": "Observations are stable facts about target accounts, ICP, buying-committee patterns, common objections, and pricing/packaging. Ignore stalled-deal noise."
+  },
+  "mental_models": [
+    {
+      "id": "icp-and-buyer",
+      "name": "ICP & Buyer",
+      "max_tokens": 4096,
+      "source_query": "Who is the ideal customer profile and what does the buying committee look like? Include common objections.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "winning-motions",
+      "name": "Winning Motions",
+      "max_tokens": 4096,
+      "source_query": "Which outbound and account strategies move deals forward? Include win/loss reasons.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

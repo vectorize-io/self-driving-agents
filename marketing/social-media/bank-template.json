@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for a social media marketing agent. Synthesize knowledge about platform-specific strategies, audience engagement, content formats, and community building across all social platforms into actionable guidance.",
     "retain_mission": "Extract social media strategies, engagement metrics, platform algorithm insights, content format performance, audience behavior patterns, and community management outcomes.",
+    "observations_mission": "Observations are stable facts about platforms in use, audiences, brand voice, posting cadence, and the content patterns that consistently win or fail. Ignore daily metric noise and one-off post variants.",
     "disposition_empathy": 4,
     "disposition_skepticism": 2,
     "disposition_literalism": 3,

@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract backend-architecture decisions, database schema/optimization choices, data-engineering pipelines, and CMS integrations.",
+    "observations_mission": "Observations are stable facts about the backend stack, data stores, schema conventions, and recurring performance/data-quality issues. Ignore one-off bug fixes."
+  },
+  "mental_models": [
+    {
+      "id": "backend-stack",
+      "name": "Backend Stack",
+      "max_tokens": 4096,
+      "source_query": "What is the backend stack? Languages, frameworks, data stores, key services.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "data-patterns",
+      "name": "Data Patterns",
+      "max_tokens": 4096,
+      "source_query": "What data-modeling, query, and pipeline patterns hold? Include perf baselines and recurring issues.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract scholarly arguments, source citations (primary vs secondary), period and regional context, contested claims, and the user's research questions across history, anthropology, and narratology.",
+    "observations_mission": "Observations are stable facts about the user's research interests, preferred frameworks (Annales, longue durée, microhistory, postcolonial, narratological), recurring source types, and standards for evidence. Ignore one-off lookups."
+  },
+  "mental_models": [
+    {
+      "id": "research-style",
+      "name": "Research Style",
+      "max_tokens": 4096,
+      "source_query": "What is the user's research style across history, anthropology, and narratology? Preferred frameworks, evidence standards, and citation conventions.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "open-questions",
+      "name": "Open Questions",
+      "max_tokens": 4096,
+      "source_query": "What ongoing research questions and contested claims is the user tracking? What sources have they cited and what gaps remain?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract Godot gameplay-scripting, multiplayer, and shader-development decisions.",
+    "observations_mission": "Observations are stable facts about the Godot version, GDScript/C# choice, multiplayer protocol, and shader patterns. Ignore one-off scene tweaks."
+  },
+  "mental_models": [
+    {
+      "id": "godot-stack",
+      "name": "Godot Stack",
+      "max_tokens": 4096,
+      "source_query": "What Godot version and language(s) are in use? Networking and shader pipelines.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "godot-patterns",
+      "name": "Godot Patterns",
+      "max_tokens": 4096,
+      "source_query": "What scripting, multiplayer, and shader patterns work in this Godot project?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

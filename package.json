@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsc && cp -r src/skill dist/",
     "test": "vitest run src/tests",
+    "lint": "node src/scripts/lint-bank-templates.mjs .",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

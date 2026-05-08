@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract regional and cross-cultural strategy, French/Korean market navigation, study-abroad advising, and translation patterns.",
+    "observations_mission": "Observations are stable facts about target regions, cultural norms, regulatory baselines, and translation conventions. Ignore one-off lookups."
+  },
+  "mental_models": [
+    {
+      "id": "regional-context",
+      "name": "Regional Context",
+      "max_tokens": 4096,
+      "source_query": "Which regions are in scope, and what cultural and regulatory norms apply?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "localization-patterns",
+      "name": "Localization Patterns",
+      "max_tokens": 4096,
+      "source_query": "What localization, translation, and cultural-adaptation patterns work in each region?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

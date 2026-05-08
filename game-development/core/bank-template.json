@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract gameplay-design pillars, level/narrative beats, audio direction, and technical-art conventions across the studio.",
+    "observations_mission": "Observations are stable facts about the game's pillars, target audience, audio/art direction, and recurring playtest feedback. Ignore one-off prototype branches."
+  },
+  "mental_models": [
+    {
+      "id": "design-pillars",
+      "name": "Design Pillars",
+      "max_tokens": 4096,
+      "source_query": "What are the game's design pillars, core loops, and narrative spine?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "production-conventions",
+      "name": "Production Conventions",
+      "max_tokens": 4096,
+      "source_query": "What production conventions hold across audio, level design, and tech-art?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

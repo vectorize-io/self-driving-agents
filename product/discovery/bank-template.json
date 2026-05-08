@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract user-research findings, customer-feedback synthesis, trend signals, and validated/invalidated hypotheses. Capture sources and confidence.",
+    "observations_mission": "Observations are stable facts about target users, jobs-to-be-done, recurring feedback themes, and trustworthy signal sources. Ignore one-off feature requests."
+  },
+  "mental_models": [
+    {
+      "id": "user-themes",
+      "name": "User Themes",
+      "max_tokens": 4096,
+      "source_query": "What recurring themes emerge from feedback and research? Include validated jobs-to-be-done and pain points worth tracking.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "trend-signal",
+      "name": "Trend Signal",
+      "max_tokens": 4096,
+      "source_query": "What trend signals are we tracking and how reliable have the sources proven? Include validated patterns and false positives.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

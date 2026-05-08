@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract healthcare customer-service workflows and marketing-compliance decisions (HIPAA, FDA, etc.).",
+    "observations_mission": "Observations are stable facts about regulated populations, PHI handling, advertising rules, and recurring compliance pitfalls. Ignore individual case details."
+  },
+  "mental_models": [
+    {
+      "id": "regulatory-frame",
+      "name": "Regulatory Frame",
+      "max_tokens": 4096,
+      "source_query": "Which healthcare regulations apply (HIPAA, FDA, payor rules), and what are the boundaries?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "service-and-marketing",
+      "name": "Service & Marketing",
+      "max_tokens": 4096,
+      "source_query": "What patterns work for healthcare CS and compliant marketing? Include common pitfalls.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

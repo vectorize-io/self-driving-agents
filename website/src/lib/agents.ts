@@ -34,7 +34,7 @@ export interface AgentFile {
 }
 
 export interface BankTemplate {
-  reflect_mission?: string;
+  observations_mission?: string;
   retain_mission?: string;
   enable_observations?: boolean;
 }

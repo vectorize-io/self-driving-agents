@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract software-architecture decisions, rapid-prototyping patterns, and senior-developer mentorship outcomes.",
+    "observations_mission": "Observations are stable facts about architectural pillars, ADR conventions, and recurring trade-offs. Ignore short-lived prototype branches."
+  },
+  "mental_models": [
+    {
+      "id": "architecture-pillars",
+      "name": "Architecture Pillars",
+      "max_tokens": 4096,
+      "source_query": "What architectural pillars and ADRs hold across the org? Include the trade-offs that drove them.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "prototyping-loop",
+      "name": "Prototyping Loop",
+      "max_tokens": 4096,
+      "source_query": "How do we prototype and graduate ideas to production? Include validation criteria and review checkpoints.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

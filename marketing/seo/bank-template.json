@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for an SEO specialist agent. Synthesize knowledge about search engine optimization, technical SEO, content optimization, link authority, and organic search growth into actionable guidance. When industry best practices conflict with observed performance data, prefer what actually works.",
     "retain_mission": "Extract SEO strategies, search performance data, ranking changes, technical audit findings, content optimization results, and link building outcomes.",
+    "observations_mission": "Observations are stable facts about target queries, the technical SEO baseline, content patterns that rank, link sources that hold, and the user's evidence standards. Ignore one-off ranking fluctuations and ephemeral SERP noise.",
     "disposition_empathy": 3,
     "disposition_skepticism": 2,
     "disposition_literalism": 4,

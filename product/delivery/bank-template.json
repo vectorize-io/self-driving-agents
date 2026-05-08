@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract roadmap decisions, prioritization rationale, sprint outcomes, behavioral-experiment results, and the framework used to balance bets.",
+    "observations_mission": "Observations are stable facts about the team's prioritization framework, north-star metric, sprint cadence, and the patterns of experiments that consistently win or fail. Ignore one-off backlog churn."
+  },
+  "mental_models": [
+    {
+      "id": "prioritization-framework",
+      "name": "Prioritization Framework",
+      "max_tokens": 4096,
+      "source_query": "How does the team prioritize? Include the framework (RICE, Kano, etc.), north-star metric, and bets currently in flight.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "experiment-learnings",
+      "name": "Experiment Learnings",
+      "max_tokens": 4096,
+      "source_query": "What sprint and behavioral experiments have we run, and what patterns emerge about what works? Include winning nudges and failed bets with numbers.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

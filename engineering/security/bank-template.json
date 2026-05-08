@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract security-engineering decisions, threat-detection patterns, smart-contract audit findings, and incident learnings.",
+    "observations_mission": "Observations are stable facts about the threat model, controls in place, audit cadence, and recurring vulnerability classes. Ignore one-off CVE noise."
+  },
+  "mental_models": [
+    {
+      "id": "threat-model",
+      "name": "Threat Model",
+      "max_tokens": 4096,
+      "source_query": "What is the threat model? Assets, attackers, controls, and current weaknesses.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "audit-and-detection",
+      "name": "Audit & Detection",
+      "max_tokens": 4096,
+      "source_query": "What audit findings and detection patterns recur, and which fixes have held?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

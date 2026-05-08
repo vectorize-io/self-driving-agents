@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract HR-onboarding, recruitment, and corporate-training decisions and outcomes.",
+    "observations_mission": "Observations are stable facts about hiring funnel, onboarding milestones, training catalog, and recurring people-ops pain. Ignore individual candidate details."
+  },
+  "mental_models": [
+    {
+      "id": "people-funnel",
+      "name": "People Funnel",
+      "max_tokens": 4096,
+      "source_query": "What does the recruiting and onboarding funnel look like? Include stage owners and timelines.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "training-and-development",
+      "name": "Training & Development",
+      "max_tokens": 4096,
+      "source_query": "What training programs and development patterns measurably help? Include catalog and outcomes.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

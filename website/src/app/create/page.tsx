@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CodeBlock } from '@/components/CodeBlock';
-import { Inline } from '@/components/Inline';
+import { HarnessCodeBlock } from '@/components/HarnessCodeBlock';
 import { link } from '@/lib/link';
 
 export const metadata: Metadata = {
@@ -11,66 +11,6 @@ export const metadata: Metadata = {
 };
 
 const NPM = 'npx @vectorize-io/self-driving-agents';
-
-interface HarnessRecipe {
-  /** harness slug */
-  slug: string;
-  /** human-readable name */
-  name: string;
-  /** what to know about this harness's setup before installing — 1-2 sentences */
-  prereq: string;
-  /** what happens after install — short prose, can use `code` markers */
-  followUp: string;
-}
-
-/**
- * Per-harness install copy specific to "Create your own". Each harness here
- * adds the same `--empty` flag for the blank case, and accepts a local dir
- * for the pre-seeded case. Only the prerequisites and the post-install step
- * differ.
- */
-const RECIPES: HarnessRecipe[] = [
-  {
-    slug: 'claude-code',
-    name: 'Claude Code',
-    prereq:
-      'Make sure `claude` is on PATH. The CLI installs the `hindsight-memory` plugin, configures the connection, and allowlists the right tools.',
-    followUp:
-      '`cd` into the project directory you want this agent scoped to, run `claude`, then paste the prompt the CLI printed. With `--empty` the prompt is just `/hindsight-memory:create-agent <name>` and the skill takes it from there interactively.',
-  },
-  {
-    slug: 'claude',
-    name: 'Claude Chat & Cowork',
-    prereq:
-      'Pick Cloud or self-hosted Hindsight when prompted. Self-hosted must be reachable from Claude\'s servers.',
-    followUp:
-      'The CLI generates a self-contained skill zip. Upload it via Customize → Skills → Upload, allowlist the Hindsight host in Settings → Capabilities, then activate the agent in any chat with `/<agent-name>`.',
-  },
-  {
-    slug: 'openclaw',
-    name: 'OpenClaw',
-    prereq:
-      'Have OpenClaw installed and on PATH. The CLI installs (or upgrades) the `hindsight-openclaw` plugin and runs its setup wizard if you don\'t have a connection configured.',
-    followUp:
-      'Restart the gateway with `openclaw gateway restart`, then open a session: `openclaw tui --session agent:<name>:main:session1`.',
-  },
-  {
-    slug: 'nemoclaw',
-    name: 'NemoClaw',
-    prereq:
-      'Have NemoClaw + at least one sandbox (`nemoclaw onboard`). The CLI patches the sandbox network policy so the plugin can reach Hindsight.',
-    followUp:
-      'Connect to the sandbox with `nemoclaw <sandbox> connect`, then open a session: `openclaw tui --session agent:main:main:session1`.',
-  },
-  {
-    slug: 'hermes',
-    name: 'Hermes',
-    prereq:
-      'Have `hermes` (NousResearch hermes-agent) on PATH. The CLI creates a Hermes profile named after the agent and drops in the `hindsight-sda` plugin.',
-    followUp:
-      'Start chatting: `hermes -p <name> chat`. Memory retains automatically from the first turn.',
-  },
-];
 
 export default function CreatePage() {
   return (
@@ -124,7 +64,9 @@ export default function CreatePage() {
                 conversation.
               </p>
               <div className="mt-4">
-                <CodeBlock code={`${NPM} install my-agent --harness claude-code --empty`} />
+                <HarnessCodeBlock
+                  template={`${NPM} install my-agent --harness {harness} --empty`}
+                />
               </div>
               <p className="mt-3 text-sm text-ink-500">
                 Then in any chat:
@@ -177,7 +119,9 @@ export default function CreatePage() {
                 />
               </div>
               <div className="mt-3">
-                <CodeBlock code={`${NPM} install ./my-agent --harness claude-code`} />
+                <HarnessCodeBlock
+                  template={`${NPM} install ./my-agent --harness {harness}`}
+                />
               </div>
             </div>
 
@@ -226,8 +170,8 @@ export default function CreatePage() {
                   code={`{
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for ...",
-    "retain_mission": "Extract ..."
+    "retain_mission": "Extract ...",
+    "observations_mission": "Observations are stable facts about ..."
   },
   "mental_models": [
     {
@@ -241,68 +185,6 @@ export default function CreatePage() {
                 />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Per-harness recipes */}
-      <section className="border-b border-ink-200 bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-12">
-          <h2 className="text-2xl font-semibold text-ink-900">
-            Run it on your harness
-          </h2>
-          <p className="mt-2 max-w-3xl text-ink-600">
-            Same install command shape across every harness. Replace{' '}
-            <code className="rounded bg-ink-100 px-1 py-0.5">my-agent</code>{' '}
-            with your name, swap the harness flag, and follow the post-install
-            step.
-          </p>
-
-          <div className="mt-8 space-y-6">
-            {RECIPES.map((r) => (
-              <div
-                key={r.slug}
-                className="rounded-xl border border-ink-200 bg-ink-50 p-6"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-ink-900">
-                    {r.name}
-                  </h3>
-                  <Link
-                    href={link(`/harnesses/${r.slug}`)}
-                    className="text-sm font-medium text-accent-600 hover:underline"
-                  >
-                    Full guide →
-                  </Link>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-ink-700">
-                  <Inline text={r.prereq} />
-                </p>
-
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <div>
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-500">
-                      Blank
-                    </p>
-                    <CodeBlock
-                      code={`${NPM} install my-agent --harness ${r.slug} --empty`}
-                    />
-                  </div>
-                  <div>
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-500">
-                      From a directory
-                    </p>
-                    <CodeBlock
-                      code={`${NPM} install ./my-agent --harness ${r.slug}`}
-                    />
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-relaxed text-ink-600">
-                  <Inline text={r.followUp} />
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

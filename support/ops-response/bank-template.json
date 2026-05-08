@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract response playbooks, infrastructure-maintenance outcomes, and legal/compliance check results across the support function.",
+    "observations_mission": "Observations are stable facts about SLAs, escalation paths, the support stack, and compliance obligations. Ignore one-off ticket details."
+  },
+  "mental_models": [
+    {
+      "id": "response-playbooks",
+      "name": "Response Playbooks",
+      "max_tokens": 4096,
+      "source_query": "What response playbooks and escalation paths are in force? Include SLAs and ownership.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "compliance-and-infra",
+      "name": "Compliance & Infra",
+      "max_tokens": 4096,
+      "source_query": "What compliance checks and infrastructure-maintenance patterns recur, and which have caught real issues?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

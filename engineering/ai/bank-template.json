@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract AI-engineering decisions: model choices, optimization patterns, voice/email integrations, and remediation outcomes.",
+    "observations_mission": "Observations are stable facts about model providers, prompt/orchestration patterns, evaluation criteria, and recurring failure modes. Ignore one-off prompt tweaks."
+  },
+  "mental_models": [
+    {
+      "id": "model-and-prompt",
+      "name": "Model & Prompt",
+      "max_tokens": 4096,
+      "source_query": "Which models and prompt patterns are we using? Include eval criteria and known failure modes.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "ai-integrations",
+      "name": "AI Integrations",
+      "max_tokens": 4096,
+      "source_query": "How are AI features integrated (voice, email, optimization), and what patterns hold across them?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

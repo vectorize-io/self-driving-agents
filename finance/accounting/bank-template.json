@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract bookkeeping policies, controls, close procedures, tax positions, and audit findings. Capture jurisdictional and entity-level decisions.",
+    "observations_mission": "Observations are stable facts about the entity's accounting policies, fiscal calendar, jurisdictions, materiality thresholds, and recurring control points. Ignore one-off journal entries."
+  },
+  "mental_models": [
+    {
+      "id": "policies-controls",
+      "name": "Policies & Controls",
+      "max_tokens": 4096,
+      "source_query": "What accounting policies, tax positions, and internal controls are in force? Include jurisdictions, materiality, and recent audit findings.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "close-and-tax-cycle",
+      "name": "Close & Tax Cycle",
+      "max_tokens": 4096,
+      "source_query": "What does the close and tax cycle look like? Include cadence, owners, recurring adjustments, and known reconciliation issues.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}

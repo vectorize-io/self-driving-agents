@@ -16,7 +16,7 @@ function searchText(a: AgentNode): string {
   const parts: string[] = [
     a.slug,
     a.displayName,
-    a.bank?.reflect_mission ?? '',
+    a.bank?.observations_mission ?? '',
     a.bank?.retain_mission ?? '',
     a.children.map((c) => c.displayName).join(' '),
     a.files.map((f) => `${f.name} ${f.description}`).join(' '),
@@ -34,8 +34,9 @@ export default function AgentsIndexPage() {
     totalFiles: a.totalFiles,
     search: searchText(a),
     isTopLevel: a.segments.length === 1,
-    mission: a.bank?.reflect_mission ?? '',
+    mission: a.bank?.retain_mission ?? '',
     childrenNames: a.children.map((c) => c.displayName),
+    mentalModelNames: a.mentalModels.map((m) => m.name),
   }));
 
   return (

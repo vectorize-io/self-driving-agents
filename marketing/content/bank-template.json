@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for a content marketing agent. Synthesize knowledge about content strategy, creation workflows, growth hacking, and audience development into actionable guidance. Track what content formats, topics, and distribution channels drive the most impact.",
     "retain_mission": "Extract content strategies, performance metrics, audience feedback, editorial decisions, and growth experiment outcomes.",
+    "observations_mission": "Observations are stable facts about audience segments, editorial voice, distribution channels, and the formats and topics that consistently drive impact. Ignore one-off post results and ephemeral traffic spikes.",
     "disposition_empathy": 3,
     "disposition_skepticism": 2,
     "disposition_literalism": 3,

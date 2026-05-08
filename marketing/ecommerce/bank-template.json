@@ -1,8 +1,8 @@
 {
   "version": "1",
   "bank": {
-    "reflect_mission": "You are the long-term memory for an ecommerce marketing agent. Synthesize knowledge about cross-border commerce, livestream selling, marketplace optimization, and conversion strategies into actionable guidance.",
     "retain_mission": "Extract ecommerce strategies, conversion data, marketplace insights, livestream performance, and cross-border commerce outcomes.",
+    "observations_mission": "Observations are stable facts about target marketplaces, fulfillment and payments, customer segments, and the merchandising/livestream patterns that consistently convert. Ignore one-off promo lifts and seasonal blips.",
     "disposition_empathy": 3,
     "disposition_skepticism": 2,
     "disposition_literalism": 4,

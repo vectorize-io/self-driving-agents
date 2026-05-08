@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract discovery findings, coaching feedback, and call-quality patterns across the sales floor.",
+    "observations_mission": "Observations are stable facts about discovery questions that uncover pain, coaching themes, and reps' recurring strengths/gaps. Ignore one-off call comments."
+  },
+  "mental_models": [
+    {
+      "id": "discovery-playbook",
+      "name": "Discovery Playbook",
+      "max_tokens": 4096,
+      "source_query": "What discovery questions and frameworks consistently surface real pain and budget?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    },
+    {
+      "id": "coaching-themes",
+      "name": "Coaching Themes",
+      "max_tokens": 4096,
+      "source_query": "What coaching themes recur across reps, and which interventions have measurably helped?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": [
+          "observation"
+        ]
+      }
+    }
+  ]
+}

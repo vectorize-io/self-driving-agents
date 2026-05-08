@@ -179,7 +179,7 @@ export const HARNESSES: Harness[] = [
       },
     ],
     color: '#B8860B',
-    logo: 'logos/hermes.svg',
+    logo: 'logos/hermes.png',
   },
   {
     slug: 'claude',

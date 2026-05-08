@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "bank": {
+    "retain_mission": "Extract FP&A models, financial-analysis assumptions, investment theses, variance commentary, and outcomes vs forecast.",
+    "observations_mission": "Observations are stable facts about the entity's revenue/cost drivers, KPIs, planning horizons, and analytical conventions. Ignore transient market noise."
+  },
+  "mental_models": [
+    {
+      "id": "drivers-and-kpis",
+      "name": "Drivers & KPIs",
+      "max_tokens": 4096,
+      "source_query": "What are the key revenue/cost drivers and KPIs? How are they computed and what targets are set?",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    },
+    {
+      "id": "forecast-vs-actuals",
+      "name": "Forecast vs Actuals",
+      "max_tokens": 4096,
+      "source_query": "What patterns emerge in forecast accuracy and variance? Include drivers behind misses and assumptions that consistently break.",
+      "trigger": {
+        "refresh_after_consolidation": true,
+        "mode": "delta",
+        "exclude_mental_models": true,
+        "fact_types": ["observation"]
+      }
+    }
+  ]
+}
