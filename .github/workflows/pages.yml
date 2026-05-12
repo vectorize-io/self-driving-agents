@@ -36,8 +36,6 @@ jobs:
 
       - name: Build
         working-directory: website
-        env:
-          SITE_BASE: /self-driving-agents
         run: npm run build
 
       - name: Upload artifact
