@@ -19,10 +19,20 @@
 **Divisions:** [Design](#design) · [Engineering](#engineering) · [Finance](#finance) · [Game Development](#game-development) · [Marketing](#marketing) · [Paid Media](#paid-media) · [Product](#product) · [Project Management](#project-management) · [Sales](#sales) · [Spatial Computing](#spatial-computing) · [Specialized](#specialized) · [Support](#support) · [Testing](#testing)
 
 ```bash
+# Built-in agent
 npx @vectorize-io/self-driving-agents install marketing/seo --harness claude
+
+# Local directory or any GitHub repo
+npx @vectorize-io/self-driving-agents install ./my-agent --harness claude
+npx @vectorize-io/self-driving-agents install my-org/my-repo/path --harness claude
+
+# Start blank, build through conversation
+npx @vectorize-io/self-driving-agents install my-agent --harness claude --empty
 ```
 
 Harnesses: `claude` · `claude-code` · `openclaw` · `nemoclaw` · `hermes`
+
+**Type `/<agent-name>` in any conversation to activate.** Claude Chat / Cowork only: upload the generated skill via `Customize → Skills → Upload`, then allowlist the API host at `Settings → Capabilities`.
 
 ---
 
@@ -500,12 +510,7 @@ my-agent/
   *.md                   # any markdown becomes seed knowledge
 ```
 
-Nest for multi-level teams. Each level can have its own `bank-template.json`.
-
-```bash
-npx @vectorize-io/self-driving-agents install ./my-agent --harness claude
-npx @vectorize-io/self-driving-agents install my-org/my-repo/path --harness openclaw
-```
+Nest for multi-level teams. Each level can have its own `bank-template.json`. Install with any of the local/repo/blank patterns shown at the top.
 
 ## Harnesses
 
