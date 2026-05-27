@@ -757,8 +757,10 @@ curl -s -X POST ${apiUrl}/v1/default/banks/${bankId}/memories/retain \\
 
 async function promptClaudeConfig(
   agentId: string,
-  opts: { askBankId?: boolean } = { askBankId: true }
+  opts: { askBankId?: boolean; allowLocalhost?: boolean } = {}
 ): Promise<{ apiUrl: string; bankId: string; apiToken?: string }> {
+  const askBankId = opts.askBankId ?? true;
+  const allowLocalhost = opts.allowLocalhost ?? false;
   const deploymentType = await p.select({
     message: "Hindsight deployment:",
     options: [
@@ -777,10 +779,15 @@ async function promptClaudeConfig(
   } else {
     const urlInput = await p.text({
       message: "Hindsight API URL:",
-      placeholder: "https://your-hindsight.example.com",
+      placeholder: allowLocalhost
+        ? "http://localhost:9077 or https://your-hindsight.example.com"
+        : "https://your-hindsight.example.com",
       validate: (val) => {
         if (!val) return "URL is required";
-        if (val.startsWith("http://localhost") || val.startsWith("http://127.0.0.1")) {
+        if (
+          !allowLocalhost &&
+          (val.startsWith("http://localhost") || val.startsWith("http://127.0.0.1"))
+        ) {
           return "Claude cannot reach localhost. Use a publicly accessible URL.";
         }
         return undefined;
@@ -791,7 +798,9 @@ async function promptClaudeConfig(
       process.exit(0);
     }
     apiUrl = urlInput as string;
-    p.log.warn("Make sure your Hindsight instance is publicly accessible from Claude's servers.");
+    if (!allowLocalhost) {
+      p.log.warn("Make sure your Hindsight instance is publicly accessible from Claude's servers.");
+    }
   }
 
   const tokenInput = await p.password({ message: "Hindsight API token:" });
@@ -802,7 +811,7 @@ async function promptClaudeConfig(
   const apiToken = (tokenInput as string) || undefined;
 
   let bankId = agentId;
-  if (opts.askBankId) {
+  if (askBankId) {
     const bankInput = await p.text({
       message: "Bank ID:",
       initialValue: agentId,
@@ -1095,9 +1104,29 @@ async function main() {
       }
 
       const hasConnection = ccConfig.hindsightApiUrl || ccConfig.llmProvider;
-      if (!hasConnection && process.stdin.isTTY) {
+      let reconfigure = !hasConnection;
+      if (hasConnection && process.stdin.isTTY) {
+        const summary =
+          ccConfig.hindsightApiUrl === HINDSIGHT_CLOUD_API_URL
+            ? "Cloud (api.hindsight.vectorize.io)"
+            : ccConfig.hindsightApiUrl
+              ? `External: ${ccConfig.hindsightApiUrl}`
+              : `LLM provider: ${ccConfig.llmProvider}`;
+        const ok = await p.confirm({
+          message: `Hindsight: ${color.cyan(summary)}. Use this?\n${color.dim("  Changing this will affect all existing Claude Code agents — one Claude Code install shares a single Hindsight connection.")}`,
+        });
+        if (p.isCancel(ok)) {
+          p.cancel("Cancelled.");
+          process.exit(0);
+        }
+        if (!ok) reconfigure = true;
+      }
+      if (reconfigure && process.stdin.isTTY) {
         // Bank ID is derived from agent + cwd at runtime — don't ask for it
-        const claudeConfig = await promptClaudeConfig(agentId, { askBankId: false });
+        const claudeConfig = await promptClaudeConfig(agentId, {
+          askBankId: false,
+          allowLocalhost: true,
+        });
         ccConfig.hindsightApiUrl = claudeConfig.apiUrl;
         ccConfig.hindsightApiToken = claudeConfig.apiToken;
       }
