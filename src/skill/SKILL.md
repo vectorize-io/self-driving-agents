@@ -41,7 +41,9 @@ Use when pages don't cover what you need.
 
 ## Ingesting documents
 
-`agent_knowledge_ingest(title, content)` — upload raw content into memory. Never summarize before ingesting. Save large content to a file first, read it, then pass the full text.
+`agent_knowledge_ingest(title, content)` — upload raw content into memory. Never summarize before ingesting. Pass the full text inline.
+
+`agent_knowledge_ingest_files(paths)` — ingest one or more files straight from disk. `paths` is a list of file paths or glob patterns (e.g. `["docs/**/*.md", "/abs/path/notes.txt"]`). Each file's content is read and stored under a document ID derived from its path. Prefer this over `agent_knowledge_ingest` when the content already lives in files — no need to read them first. Use absolute paths when in doubt; relative paths resolve against the working directory.
 
 ## Updating and deleting
 
