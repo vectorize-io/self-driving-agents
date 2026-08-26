@@ -11,8 +11,8 @@
   "dependencies": {
     "gray-matter": "^4.0.3",
     "marked": "^15.0.0",
-    "mermaid": "^11.14.0",
-    "next": "^15.1.0",
+    "mermaid": "^11.16.1",
+    "next": "^15.5.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
@@ -23,5 +23,8 @@
     "@types/react-dom": "^19.0.0",
     "tailwindcss": "^4.1.10",
     "typescript": "^5.7.0"
+  },
+  "overrides": {
+    "postcss": "^8.5.26"
   }
 }
