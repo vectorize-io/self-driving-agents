@@ -455,6 +455,20 @@ Harnesses: `claude` · `claude-code` · `openclaw` · `nemoclaw` · `hermes`
 | 📊 [Sales Data Extraction Agent](specialized/sales-ops/sales-data-extraction-agent.md) | Watches Excel, extracts the metrics. |
 | 🎯 [Sales Outreach](specialized/sales-ops/sales-outreach.md) | Help people buy, don't sell. |
 
+## Getting started
+
+Install dependencies first:
+
+```bash
+npm install
+```
+
+## Requirements
+
+- Node.js `>=20`
+- npm (lockfile: package-lock.json)
+- A local `.env` created from `.env.example`
+
 ### Support
 
 #### [`support/analytics`](support/analytics/) — Reporting, finance, executive summaries
